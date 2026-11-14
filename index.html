@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#000000">
+<title>彈球競技場 · Bounce Ball Arena</title>
+<style>
+:root{color-scheme:dark;--accent:#dbff68;--muted:#b0b0ba;--edge:#323239;font-family:system-ui,sans-serif;background:#000;color:#fff}*{box-sizing:border-box}body{margin:0}button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,canvas:focus-visible{outline:2px solid #fff;outline-offset:4px}button:disabled{cursor:not-allowed;opacity:.4}[hidden]{display:none!important}
+.screen{width:min(100% - 36px,840px);margin:auto}.home{min-height:100svh;display:grid;place-items:center}.px{height:1em;width:auto;display:inline-block;vertical-align:middle;fill:currentColor;shape-rendering:crispEdges}.primary{border:2px solid var(--accent);background:var(--accent);color:#080b00;padding:13px 22px;box-shadow:5px 5px 0 #61782a;font-size:20px}.primary:hover{background:#ecffa9}.home .primary{font-size:clamp(28px,7vw,44px);padding:20px 32px;box-shadow:8px 8px 0 #61782a}
+.select-screen{padding-block:clamp(24px,8vh,74px)}.eyebrow,.hud small,.controls,.counter{font-family:monospace;letter-spacing:.12em;font-weight:700}.eyebrow{color:var(--accent);font-size:14px;margin:0 0 12px}h1{margin:0;font-size:clamp(31px,7vw,52px)}.intro{color:var(--muted);margin:16px 0 24px}.roster{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.card{grid-column:span 2;text-align:left;min-height:116px;background:#101014;border:1px solid var(--edge);color:white;padding:12px;position:relative}.card:hover,.card[aria-pressed=true]{border-color:var(--ball);background:#18181e}.card[aria-pressed=true]{box-shadow:inset 3px 0 var(--ball)}.card-top{display:flex;align-items:center;gap:10px}.orb{width:24px;height:24px;background:var(--ball);clip-path:polygon(25% 0,75% 0,75% 12.5%,87.5% 12.5%,87.5% 25%,100% 25%,100% 75%,87.5% 75%,87.5% 87.5%,75% 87.5%,75% 100%,25% 100%,25% 87.5%,12.5% 87.5%,12.5% 75%,0 75%,0 25%,12.5% 25%,12.5% 12.5%,25% 12.5%);flex:none}.card b{font-size:18px}.card small{display:block;color:var(--muted);font-size:13px;line-height:1.5;margin-top:8px}.counter{font-size:11px;color:var(--ball);margin-top:6px;display:block}.choose-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:22px;flex-wrap:wrap}.choose-footer label{color:var(--muted);display:flex;align-items:center;gap:8px}select,.secondary{background:#101014;border:1px solid #595963;color:#fff;padding:8px 10px}.secondary:hover{border-color:#fff}
+.play{width:min(100% - 28px,570px, max(350px,100svh - 172px));padding:14px 0 18px}.hud{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;margin-bottom:10px}.fighter:last-child{text-align:right}.hud small{font-size:11px;color:var(--muted)}.hptext{font:bold 12px monospace;white-space:nowrap}.track{margin-top:5px;background:#29292d;height:7px}.track i{display:block;height:100%;width:100%;background:var(--ball)}.fighter:last-child .track i{margin-left:auto}.timer{font:700 20px monospace;color:#fff}.field{position:relative}.arena{display:block;width:100%;aspect-ratio:1;background:#000;border:2px solid #fff;touch-action:none;image-rendering:pixelated;cursor:crosshair}.controls{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:12px;font-size:13px}.controls div{display:flex;gap:5px;flex-shrink:0}.hint{color:var(--muted);line-height:1.45;letter-spacing:0}.result{position:absolute;inset:2px;display:grid;place-items:center;background:#000c;text-align:center}.result h2{font-size:35px;margin:0;color:var(--accent)}.result p{color:var(--muted);margin:14px 0 20px}.result .primary{font-size:16px}
+@media(max-width:600px){.roster{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.card{grid-column:span 1;min-height:106px;padding:10px}.card b{font-size:16px}.card small{font-size:12px}.choose-footer{gap:12px}.hud{gap:8px}}@media(max-width:340px){.choose-footer{align-items:flex-start;flex-direction:column}.controls{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<main>
+<section id="home" class="screen home"><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></section>
+<section id="select" class="screen select-screen" hidden>
+<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.1</p>
+<h1><span data-pixel="選擇你的球"></span></h1>
+<p class="intro">選一顆球迎戰電腦。發射後，兩顆球會自動彈跳並發動技能。</p>
+<div id="roster" class="roster" role="group" aria-label="你的球"></div>
+<div class="choose-footer"><label>電腦對手 <select id="rival"><option value="random">隨機抽選</option></select></label><button class="primary" id="enter" aria-label="進入競技場" disabled><span data-pixel="進入競技場"></span></button></div>
+</section>
+<section id="play" class="screen play" hidden>
+<div class="hud">
+<div class="fighter" id="fighter0"><small>1P</small> <span id="name0"></span> <span id="hp0" class="hptext"></span><div class="track"><i></i></div></div>
+<div class="timer" id="timer">75</div>
+<div class="fighter" id="fighter1"><small>CPU</small> <span id="name1"></span> <span id="hp1" class="hptext"></span><div class="track"><i></i></div></div>
+</div>
+<div class="field">
+<canvas id="arena" class="arena" width="400" height="400" tabindex="0" aria-label="競技場。按住框內選定起點，向發射方向的反方向拖曳後放開。鍵盤可用方向鍵選發射方向、加減鍵調力道、空白鍵發射。"></canvas>
+<div class="result" id="result" hidden><div><h2 id="outcome"></h2><p id="reason"></p><button id="again" class="primary"><span data-pixel="再戰一場"></span></button></div></div>
+</div>
+<div class="controls"><span id="hint" class="hint" aria-live="polite"></span><div><button id="reset" class="secondary">重開</button><button id="back" class="secondary">換球</button></div></div>
+</section>
+</main>
+<script>
+'use strict';
+const glyphs = {"贏":[15,[[6,0,2],[0,1,14],[2,2,2],[3,3,10],[2,4,10],[2,5,2],[10,5,2],[2,6,10],[1,7,11],[1,8,11],[1,9,9],[11,9,1],[1,10,11],[1,11,7],[9,11,3],[1,12,1],[3,12,7],[11,12,3],[1,13,5],[8,13,2],[11,13,2]]],"L":[9,[[1,1,2],[1,2,2],[1,3,2],[1,4,2],[1,5,2],[1,6,2],[1,7,2],[1,8,2],[1,9,2],[1,10,6],[1,11,7]]]," ":[4,[]],"遊":[15,[[1,0,2],[6,0,1],[10,0,1],[1,1,2],[6,1,1],[9,1,2],[2,2,12],[2,3,1],[5,3,2],[8,3,2],[1,4,3],[5,4,3],[9,4,4],[2,5,2],[5,5,4],[11,5,2],[1,6,2],[5,6,1],[7,6,2],[10,6,2],[0,7,4],[5,7,1],[7,7,7],[2,8,2],[5,8,1],[7,8,2],[10,8,2],[2,9,4],[7,9,2],[10,9,2],[2,10,3],[7,10,1],[9,10,3],[1,11,4],[6,11,2],[1,12,13],[1,13,1],[5,13,8]]],"手":[15,[[7,0,5],[1,1,10],[2,2,1],[6,2,2],[6,3,2],[2,4,10],[1,5,12],[6,6,2],[6,7,2],[1,8,13],[1,9,12],[6,10,2],[6,11,2],[3,12,5],[4,13,3]]],"選":[15,[[5,0,4],[1,1,2],[5,1,1],[7,1,6],[2,2,2],[5,2,8],[2,3,1],[4,3,2],[7,3,1],[9,3,2],[1,4,7],[9,4,4],[2,5,1],[6,5,2],[10,5,1],[1,6,2],[5,6,8],[0,7,4],[6,7,2],[9,7,2],[2,8,2],[6,8,2],[9,8,2],[2,9,11],[2,10,2],[6,10,2],[10,10,2],[2,11,5],[11,11,2],[1,12,13],[1,13,1],[5,13,8]]],"B":[11,[[1,1,6],[1,2,7],[1,3,2],[6,3,2],[1,4,2],[6,4,2],[1,5,7],[1,6,7],[1,7,2],[6,7,3],[1,8,2],[7,8,2],[1,9,2],[7,9,2],[1,10,7],[1,11,6]]],"C":[10,[[3,1,5],[2,2,6],[1,3,3],[7,3,1],[1,4,2],[1,5,2],[1,6,2],[1,7,2],[1,8,2],[1,9,3],[7,9,1],[2,10,7],[3,11,5]]],"E":[10,[[1,1,7],[1,2,7],[1,3,2],[1,4,2],[1,5,6],[1,6,6],[1,7,2],[1,8,2],[1,9,2],[1,10,7],[1,11,7]]],"R":[11,[[1,1,6],[1,2,7],[1,3,2],[6,3,3],[1,4,2],[7,4,2],[1,5,2],[6,5,3],[1,6,7],[1,7,6],[1,8,2],[5,8,2],[1,9,2],[6,9,2],[1,10,2],[6,10,3],[1,11,2],[7,11,2]]],"的":[15,[[3,0,2],[8,0,2],[3,1,2],[8,1,2],[1,2,5],[7,2,6],[1,3,5],[7,3,6],[1,4,2],[5,4,3],[12,4,1],[1,5,2],[5,5,3],[12,5,1],[1,6,5],[8,6,1],[11,6,2],[1,7,5],[8,7,2],[11,7,2],[1,8,2],[5,8,1],[9,8,4],[1,9,2],[5,9,1],[9,9,4],[1,10,2],[5,10,1],[11,10,2],[1,11,5],[11,11,2],[1,12,5],[8,12,5],[1,13,1],[8,13,4]]],"血":[15,[[6,0,1],[5,1,2],[5,2,2],[2,3,10],[2,4,10],[2,5,1],[5,5,1],[8,5,1],[10,5,2],[2,6,1],[5,6,1],[8,6,1],[10,6,2],[2,7,1],[5,7,1],[8,7,1],[10,7,2],[2,8,1],[5,8,1],[8,8,1],[10,8,2],[2,9,1],[5,9,1],[8,9,1],[10,9,2],[2,10,1],[5,10,1],[8,10,1],[10,10,2],[1,11,12],[0,12,14]]],"射":[15,[[3,0,2],[11,0,1],[3,1,2],[10,1,2],[1,2,6],[10,2,2],[1,3,2],[5,3,8],[1,4,13],[1,5,2],[5,5,2],[10,5,2],[1,6,6],[8,6,1],[10,6,2],[1,7,2],[5,7,2],[8,7,4],[0,8,7],[8,8,4],[4,9,3],[9,9,3],[2,10,5],[10,10,2],[1,11,3],[5,11,2],[10,11,2],[1,12,1],[5,12,2],[9,12,3],[4,13,2],[9,13,3]]],"波":[15,[[2,0,1],[8,0,2],[1,1,3],[8,1,2],[3,2,1],[5,2,8],[5,3,8],[1,4,1],[5,4,2],[8,4,2],[11,4,2],[1,5,3],[5,5,7],[2,6,1],[5,6,8],[5,7,3],[10,7,2],[3,8,1],[5,8,1],[7,8,2],[10,8,2],[2,9,4],[7,9,4],[2,10,4],[8,10,3],[1,11,2],[4,11,2],[7,11,5],[1,12,2],[4,12,5],[10,12,3],[4,13,1],[6,13,2],[11,13,2]]],"戲":[15,[[4,0,1],[9,0,3],[4,1,4],[9,1,4],[4,2,1],[9,2,2],[12,2,1],[1,3,7],[9,3,2],[1,4,13],[1,5,2],[4,5,1],[8,5,4],[1,6,1],[4,6,4],[9,6,2],[12,6,1],[1,7,7],[9,7,4],[1,8,1],[3,8,5],[9,8,4],[1,9,1],[3,9,1],[7,9,1],[10,9,2],[1,10,1],[3,10,5],[10,10,2],[0,11,2],[6,11,1],[9,11,5],[0,12,2],[3,12,10],[2,13,4],[11,13,2]]],"N":[11,[[1,1,3],[7,1,2],[1,2,3],[7,2,2],[1,3,4],[7,3,2],[1,4,4],[7,4,2],[1,5,2],[4,5,2],[7,5,2],[1,6,2],[4,6,2],[7,6,2],[1,7,2],[5,7,4],[1,8,2],[5,8,4],[1,9,2],[6,9,3],[1,10,2],[6,10,3],[1,11,2],[7,11,2]]],"進":[15,[[1,0,2],[6,0,2],[9,0,1],[1,1,2],[6,1,2],[9,1,1],[2,2,2],[5,2,3],[9,2,2],[2,3,1],[5,3,8],[1,4,6],[9,4,2],[2,5,11],[1,6,2],[5,6,2],[9,6,1],[0,7,4],[5,7,8],[2,8,2],[5,8,2],[9,8,2],[2,9,2],[5,9,2],[8,9,3],[2,10,2],[5,10,8],[2,11,3],[1,12,13],[1,13,1],[5,13,8]]],"一":[15,[[0,6,14],[1,7,12]]],"蓄":[15,[[3,0,2],[9,0,2],[1,1,12],[3,2,2],[6,2,1],[9,2,2],[6,3,2],[1,4,12],[3,5,7],[2,6,6],[9,6,2],[2,7,11],[2,8,4],[11,8,1],[2,9,10],[2,10,2],[6,10,2],[10,10,2],[2,11,10],[2,12,2],[6,12,2],[10,12,2],[2,13,10]]],"擇":[15,[[2,0,2],[2,1,2],[5,1,8],[2,2,2],[5,2,6],[12,2,1],[0,3,13],[1,4,3],[8,4,2],[2,5,2],[5,5,8],[2,6,2],[8,6,2],[1,7,12],[0,8,4],[7,8,1],[10,8,2],[2,9,2],[5,9,8],[2,10,2],[8,10,2],[2,11,2],[5,11,9],[1,12,3],[8,12,2],[1,13,2],[8,13,2]]],"電":[15,[[1,1,12],[6,2,2],[1,3,12],[1,4,4],[6,4,2],[9,4,4],[1,5,2],[4,5,7],[2,6,3],[6,6,2],[2,7,10],[2,8,2],[6,8,2],[10,8,2],[2,9,10],[2,10,2],[6,10,2],[10,10,2],[2,11,11],[2,12,2],[6,12,2],[12,12,2],[6,13,7]]],"場":[15,[[2,0,2],[6,0,7],[2,1,2],[6,1,2],[11,1,2],[2,2,2],[6,2,7],[1,3,4],[6,3,2],[11,3,2],[1,4,4],[6,4,7],[2,5,2],[2,6,2],[5,6,9],[2,7,2],[5,7,3],[2,8,11],[1,9,12],[1,10,2],[4,10,1],[6,10,2],[9,10,4],[6,11,2],[9,11,1],[11,11,2],[5,12,2],[8,12,2],[11,12,2],[7,13,2],[10,13,2]]],"你":[15,[[3,0,2],[6,0,2],[3,1,1],[6,1,2],[2,2,2],[5,2,8],[1,3,3],[5,3,9],[1,4,5],[8,4,2],[12,4,1],[0,5,6],[8,5,2],[12,5,1],[1,6,3],[8,6,2],[11,6,1],[2,7,2],[6,7,1],[8,7,2],[11,7,1],[2,8,2],[5,8,2],[8,8,2],[11,8,2],[2,9,2],[5,9,2],[8,9,2],[11,9,2],[2,10,4],[8,10,2],[11,10,2],[2,11,2],[5,11,1],[8,11,2],[12,11,1],[2,12,2],[7,12,3],[2,13,2],[7,13,2]]],"再":[15,[[1,1,12],[1,2,12],[2,3,10],[2,4,10],[2,5,2],[6,5,2],[10,5,2],[2,6,10],[2,7,10],[2,8,2],[6,8,2],[10,8,2],[0,9,14],[1,10,12],[2,11,2],[10,11,2],[2,12,2],[8,12,4],[2,13,2],[8,13,4]]],"競":[15,[[3,0,2],[9,0,2],[1,1,12],[1,2,2],[4,2,2],[8,2,1],[10,2,2],[2,3,1],[4,3,2],[8,3,1],[10,3,2],[1,4,12],[1,6,5],[7,6,6],[1,7,2],[5,7,1],[7,7,2],[11,7,2],[1,8,5],[7,8,6],[2,9,4],[8,9,4],[2,10,1],[4,10,2],[8,10,1],[10,10,2],[1,11,2],[4,11,5],[10,11,2],[1,12,2],[4,12,5],[10,12,4],[1,13,1],[6,13,2],[10,13,3]]],"平":[15,[[1,1,12],[2,2,10],[3,3,1],[6,3,2],[10,3,2],[2,4,2],[6,4,2],[10,4,2],[3,5,2],[6,5,2],[9,5,2],[3,6,1],[6,6,2],[9,6,2],[1,7,12],[1,8,12],[6,9,2],[6,10,2],[6,11,2],[6,12,2],[6,13,2]]],"A":[10,[[3,1,3],[3,2,3],[2,3,5],[2,4,2],[5,4,2],[2,5,2],[5,5,2],[2,6,2],[5,6,2],[1,7,7],[1,8,7],[1,9,2],[6,9,2],[0,10,2],[6,10,3],[0,11,2],[7,11,2]]],"腦":[15,[[1,0,4],[7,0,1],[9,0,1],[12,0,1],[1,1,4],[6,1,2],[9,1,1],[11,1,2],[1,2,2],[4,2,3],[8,2,4],[1,3,2],[4,3,1],[6,3,1],[8,3,2],[11,3,2],[1,4,4],[6,4,2],[9,4,4],[1,5,4],[7,5,4],[12,5,1],[1,6,2],[4,6,1],[8,6,2],[1,7,4],[6,7,7],[1,8,4],[6,8,1],[8,8,1],[10,8,3],[1,9,2],[4,9,1],[6,9,1],[8,9,3],[12,9,1],[1,10,1],[4,10,1],[6,10,7],[1,11,1],[4,11,1],[6,11,3],[10,11,3],[0,12,2],[3,12,2],[6,12,7],[1,13,4],[6,13,2],[11,13,2]]],"O":[12,[[3,1,5],[2,2,7],[1,3,3],[7,3,2],[1,4,2],[7,4,3],[1,5,2],[8,5,2],[1,6,2],[8,6,2],[1,7,2],[8,7,2],[1,8,2],[7,8,3],[1,9,3],[7,9,2],[2,10,7],[3,11,5]]],"吸":[15,[[1,1,11],[1,2,4],[6,2,6],[1,3,1],[3,3,2],[6,3,2],[10,3,2],[1,4,1],[3,4,2],[6,4,2],[10,4,2],[1,5,1],[3,5,2],[6,5,7],[1,6,1],[3,6,2],[6,6,7],[1,7,1],[3,7,2],[6,7,3],[11,7,2],[1,8,1],[3,8,2],[6,8,3],[11,8,2],[1,9,6],[8,9,4],[1,10,6],[9,10,3],[1,11,1],[5,11,2],[8,11,4],[4,12,2],[7,12,6],[4,13,1],[7,13,2],[12,13,1]]],"勝":[15,[[1,0,4],[6,0,1],[9,0,1],[1,1,4],[6,1,4],[11,1,2],[1,2,2],[4,2,1],[6,2,6],[1,3,2],[4,3,1],[6,3,7],[1,4,4],[8,4,2],[1,5,13],[1,6,2],[4,6,1],[6,6,3],[10,6,3],[1,7,9],[11,7,2],[1,8,9],[11,8,2],[1,9,1],[4,9,1],[6,9,7],[1,10,1],[4,10,1],[8,10,1],[11,10,1],[1,11,1],[4,11,1],[7,11,2],[11,11,1],[0,12,2],[3,12,2],[6,12,2],[10,12,2],[1,13,1],[3,13,2],[6,13,1],[9,13,3]]],"震":[15,[[2,1,10],[6,2,2],[1,3,12],[1,4,7],[9,4,4],[2,5,9],[2,6,2],[2,7,11],[2,8,10],[2,9,1],[1,10,12],[1,11,2],[4,11,2],[8,11,4],[1,12,12],[1,13,1],[3,13,4],[11,13,2]]],"入":[15,[[3,1,5],[3,2,5],[6,3,2],[6,4,3],[5,5,4],[5,6,4],[5,7,4],[4,8,2],[8,8,2],[4,9,2],[8,9,3],[3,10,2],[9,10,2],[2,11,3],[10,11,2],[1,12,3],[10,12,3],[1,13,2],[12,13,1]]],"力":[15,[[5,0,2],[5,1,2],[5,2,2],[1,3,12],[1,4,12],[5,5,2],[11,5,2],[5,6,2],[11,6,2],[5,7,2],[11,7,2],[4,8,2],[11,8,2],[4,9,2],[11,9,2],[3,10,2],[10,10,2],[2,11,3],[10,11,2],[1,12,3],[8,12,4],[1,13,2],[8,13,3]]],"鐵":[15,[[2,0,2],[7,0,1],[10,0,2],[2,1,11],[1,2,8],[10,2,1],[12,2,1],[0,3,2],[4,3,10],[1,4,4],[9,4,3],[2,5,2],[5,5,6],[2,6,2],[5,6,2],[8,6,3],[12,6,1],[1,7,12],[1,8,3],[8,8,1],[10,8,3],[1,9,8],[10,9,3],[1,10,8],[10,10,2],[2,11,3],[6,11,6],[13,11,1],[1,12,13],[1,13,1],[9,13,1],[11,13,2]]],"甲":[15,[[2,1,11],[2,2,11],[2,3,1],[6,3,2],[11,3,2],[2,4,11],[2,5,11],[2,6,1],[6,6,2],[11,6,2],[2,7,1],[6,7,2],[11,7,2],[2,8,11],[2,9,11],[6,10,2],[6,11,2],[6,12,2],[6,13,2]]],"了":[15,[[1,1,11],[1,2,11],[8,3,3],[7,4,3],[6,5,3],[6,6,2],[6,7,2],[6,8,2],[6,9,2],[6,10,2],[6,11,2],[4,12,4],[4,13,3]]],"U":[11,[[1,1,2],[7,1,2],[1,2,2],[7,2,2],[1,3,2],[7,3,2],[1,4,2],[7,4,2],[1,5,2],[7,5,2],[1,6,2],[7,6,2],[1,7,2],[7,7,2],[1,8,2],[7,8,2],[2,9,2],[7,9,2],[2,10,6],[3,11,4]]],"球":[15,[[8,0,2],[11,0,1],[0,1,5],[8,1,2],[11,1,2],[1,2,3],[5,2,8],[2,3,2],[5,3,9],[2,4,2],[8,4,2],[0,5,7],[8,5,2],[11,5,2],[1,6,3],[6,6,7],[2,7,2],[6,7,1],[8,7,4],[2,8,2],[7,8,4],[2,9,3],[6,9,6],[1,10,12],[0,11,4],[5,11,2],[8,11,2],[11,11,3],[7,12,3],[12,12,1],[7,13,3]]],"技":[15,[[2,0,2],[8,0,2],[2,1,2],[8,1,2],[2,2,2],[5,2,8],[0,3,13],[1,4,4],[8,4,2],[2,5,2],[6,5,6],[2,6,11],[1,7,4],[6,7,2],[11,7,2],[1,8,3],[6,8,3],[10,8,2],[2,9,2],[7,9,5],[2,10,2],[8,10,3],[2,11,2],[7,11,4],[1,12,3],[5,12,8],[1,13,2],[5,13,2],[11,13,2]]],"開":[15,[[1,1,12],[1,2,2],[5,2,4],[11,2,2],[1,3,12],[1,4,2],[5,4,4],[11,4,2],[1,5,12],[1,6,2],[11,6,2],[1,7,2],[4,7,6],[11,7,2],[1,8,2],[5,8,1],[8,8,1],[11,8,2],[1,9,12],[1,10,2],[4,10,5],[11,10,2],[1,11,2],[4,11,2],[8,11,1],[11,11,2],[1,12,2],[4,12,2],[8,12,1],[10,12,3],[1,13,2],[4,13,1],[8,13,1],[10,13,3]]],"始":[15,[[2,0,2],[8,0,2],[2,1,2],[8,1,2],[2,2,1],[4,2,2],[7,2,2],[10,2,2],[0,3,6],[7,3,2],[11,3,2],[1,4,12],[1,5,2],[4,5,10],[1,6,2],[4,6,1],[6,6,4],[12,6,2],[1,7,1],[4,7,1],[1,8,4],[6,8,7],[2,9,3],[6,9,7],[2,10,3],[6,10,2],[11,10,2],[2,11,6],[11,11,2],[1,12,2],[6,12,7],[1,13,1],[6,13,7]]],"戰":[15,[[1,0,7],[9,0,1],[11,0,1],[1,1,1],[3,1,5],[9,1,1],[11,1,2],[1,2,1],[3,2,5],[9,2,1],[12,2,1],[1,3,7],[9,3,2],[12,3,1],[1,4,13],[1,5,4],[6,5,7],[1,6,7],[9,6,2],[12,6,1],[1,7,4],[6,7,2],[9,7,4],[1,8,7],[9,8,4],[3,9,2],[9,9,3],[1,10,7],[9,10,3],[0,11,14],[3,12,2],[7,12,7],[3,13,2],[8,13,1],[11,13,2]]],"雷":[15,[[1,1,12],[6,2,2],[1,3,12],[1,4,4],[6,4,2],[9,4,4],[1,5,2],[4,5,1],[6,5,4],[11,5,2],[2,6,9],[2,7,2],[10,7,1],[2,8,10],[2,9,2],[6,9,2],[10,9,2],[2,10,10],[2,11,2],[6,11,2],[10,11,2],[2,12,10],[2,13,2],[10,13,2]]],"獲":[15,[[1,0,1],[7,0,2],[10,0,1],[1,1,8],[10,1,4],[2,2,2],[6,2,6],[1,3,3],[5,3,2],[8,3,2],[0,4,13],[3,5,10],[3,6,2],[6,6,1],[9,6,1],[2,7,3],[6,7,7],[2,8,3],[6,8,1],[9,8,1],[1,9,4],[6,9,7],[1,10,1],[3,10,10],[3,11,10],[1,12,3],[6,12,6],[1,13,2],[4,13,4],[9,13,4]]]};
+function pixel(el, text) {
+  if (!el || !text) return;
+  const ns='http://www.w3.org/2000/svg', svg=document.createElementNS(ns,'svg');
+  const path=document.createElementNS(ns,'path');
+  let x=0,d='';
+  for(const c of text){const g=glyphs[c];if(!g){x+=5;continue;}for(const [a,b,n] of g[1])d+='M'+(x+a)+' '+b+'h'+n+'v1h-'+n+'z';x+=g[0];}
+  svg.setAttribute('viewBox','0 0 '+Math.max(1,x-1)+' 14');svg.setAttribute('class','px');
+  svg.setAttribute('role','img');svg.setAttribute('aria-label',text);path.setAttribute('d',d);
+  svg.append(path);el.replaceChildren(svg);
+}
+document.querySelectorAll('[data-pixel]').forEach(el=>pixel(el,el.dataset.pixel));
+const $=id=>document.getElementById(id);
+const types=[
+  {id:'tank',name:'鐵甲球',color:'#dfff69',hp:60,desc:'雙倍血量。撞到對手時，雙方各扣 1 點。'},
+  {id:'vamp',name:'吸血球',color:'#ff5778',hp:30,desc:'碰到對手後黏住 1.2 秒，每 0.4 秒吸取 1 點。'},
+  {id:'laser',name:'雷射球',color:'#c185ff',hp:30,desc:'接連撞到兩面不同的牆，就連起雷射。對手穿過扣 2 點。'},
+  {id:'charge',name:'蓄力球',color:'#ffb454',hp:30,desc:'每撞牆一次蓄一格，滿 3 格後下一撞扣對手 5 點並擊退。'},
+  {id:'wave',name:'震波球',color:'#54defa',hp:30,desc:'對手靠近就發出震波，扣 2 點並推開。冷卻 4 秒。'}
+];
+let selection=null, matchRival=null;
+for (const [i,t] of types.entries()){
+  const b=document.createElement('button');b.className='card';b.style.setProperty('--ball',t.color);
+  b.setAttribute('aria-pressed','false');b.innerHTML='<span class="card-top"><i class="orb" aria-hidden="true"></i><b></b></span><small></small><span class="counter"></span>';
+  pixel(b.querySelector('b'),t.name);b.querySelector('small').textContent=t.desc;b.querySelector('.counter').textContent='0'+(i+1)+' / '+t.hp+' HP';
+  b.onclick=()=>{selection=t;for(const c of $('roster').children)c.setAttribute('aria-pressed',String(c===b));$('enter').disabled=false;};
+  $('roster').append(b);$('rival').add(new Option(t.name,t.id));
+}
+let screen='home';
+function show(next){if(next!==screen&&screen==='play'){stop();drag=null;} for(const name of ['home','select','play'])$(name).hidden=name!==next;screen=next;}
+$('start').onclick=()=>{show('select');$('roster').firstElementChild.focus();};
+$('enter').onclick=()=>{if(!selection)return;const pool=types.filter(t=>t!==selection);
+  matchRival=types.find(t=>t.id===$('rival').value)||pool[Math.floor(Math.random()*pool.length)];show('play');reset();};
+$('back').onclick=()=>{show('select');$('roster').querySelector('[aria-pressed=true]').focus();};
+$('again').onclick=$('reset').onclick=()=>reset();
+
+const W=400,R=13,TIME=75, STEP=1/180, cv=$('arena'), ctx=cv.getContext('2d');
+const hypot=Math.hypot, clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+let balls=[], beams=[], sparks=[], floats=[], grip=null, t=0, contact=false, drag=null, state='idle', raf=0,last=0,acc=0,keyAim=null;
+function make(type,x,y){return {type,x,y,vx:0,vy:0,hp:type.hp,ready:0,energy:0,wall:null,trail:[],flash:0};}
+function reset(){
+  stop();balls=[make(selection,120,200),make(matchRival,300,200)];beams=[];sparks=[];floats=[];grip=null;t=0;contact=false;drag=null;keyAim=null;state='idle';$('result').hidden=true;
+  for(const [i,b] of balls.entries()){pixel($('name'+i),b.type.name);$('fighter'+i).style.setProperty('--ball',b.type.color);}
+  $('hint').textContent='按住框內起點，向後拉，放開發射。';hud();render();cv.focus({preventScroll:true});
+}
+function stop(){cancelAnimationFrame(raf);raf=0;}
+function hud(){
+  $('timer').textContent=String(Math.max(0,Math.ceil(TIME-t))).padStart(2,'0');
+  for(const [i,b] of balls.entries()){
+    $('hp'+i).textContent=b.hp+'/'+b.type.hp;
+    $('fighter'+i).querySelector('.track i').style.width=100*b.hp/b.type.hp+'%';
+  }
+}
+function point(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left-cv.clientLeft)*W/cv.clientWidth,y:(e.clientY-r.top-cv.clientTop)*W/cv.clientHeight};}
+function legal(p){return{x:clamp(p.x,R+1,W-R-1),y:clamp(p.y,R+1,W-R-1)};}
+function vec(a,b){const x=a.x-b.x,y=a.y-b.y,n=hypot(x,y);return{x:n?x/n:0,y:n?y/n:0,n};}
+function launch(p,v){
+  if(state!=='idle'||v.n<5)return;
+  drag=null;keyAim=null;state='run';const speed=clamp(125+v.n*2.15,140,390);
+  Object.assign(balls[0],{x:p.x,y:p.y,vx:v.x*speed,vy:v.y*speed});
+  const right=p.x<W/2;
+  const cpu={x:right?300:100,y:clamp(p.y+(p.y>W/2?-48:48),R+1,W-R-1)};
+  const d=vec(p,cpu),a=Math.atan2(d.y,d.x)+(Math.random()-.5)*.36;
+  Object.assign(balls[1],{...cpu,vx:Math.cos(a)*235,vy:Math.sin(a)*235});
+  $('hint').textContent='對戰中 · 球會自動反彈與施放技能';
+  last=0;acc=0;raf=requestAnimationFrame(frame);
+}
+cv.addEventListener('pointerdown',e=>{
+  if(state!=='idle'||drag||e.button!==0)return;
+  const p=point(e);if(p.x<0||p.y<0||p.x>W||p.y>W)return;
+  cv.setPointerCapture(e.pointerId);keyAim=null;
+  drag={id:e.pointerId,origin:legal(p),raw:p,end:p};render();
+});
+cv.addEventListener('pointermove',e=>{if(drag?.id!==e.pointerId)return;drag.end=point(e);render();});
+cv.addEventListener('pointerup',e=>{
+  if(drag?.id!==e.pointerId)return;const d=drag;drag=null;
+  launch(d.origin,vec(d.raw,point(e)));render();
+});
+for(const ev of ['pointercancel','lostpointercapture'])cv.addEventListener(ev,e=>{if(drag?.id===e.pointerId){drag=null;render();}});
+cv.addEventListener('keydown',e=>{
+  const dirs={ArrowRight:0,ArrowDown:Math.PI/2,ArrowLeft:Math.PI,ArrowUp:-Math.PI/2};
+  if(state!=='idle'||drag||!(e.key in dirs)&&![' ','+','-','='].includes(e.key))return;
+  e.preventDefault();keyAim??={a:0,n:55};
+  if(e.key in dirs)keyAim.a=dirs[e.key];
+  else if(e.key===' ')launch(balls[0],{x:Math.cos(keyAim.a),y:Math.sin(keyAim.a),n:keyAim.n});
+  else keyAim.n=clamp(keyAim.n+(e.key==='-'?-12:12),10,125);
+  render();
+});
+function change(b,delta){
+  const n=clamp(b.hp+delta,0,b.type.hp)-b.hp;b.hp+=n;if(!n)return;
+  if(n<0)b.flash=t+.14;
+  floats.push({x:b.x,y:b.y,start:t,label:n>0?'+'+n:String(n),color:n>0?'#dfff69':'#ff7991'});
+}
+function burst(b,r){sparks.push({x:b.x,y:b.y,start:t,r,color:b.type.color});}
+function wallHit(b,side,x,y){
+  if(b.type.id==='charge')b.energy=Math.min(3,b.energy+1);
+  if(b.type.id!=='laser')return;
+  const point={x,y,side};
+  if(!b.wall||b.wall.side===side){b.wall=point;return;}
+  if(hypot(b.wall.x-x,b.wall.y-y)>1)beams.push({a:b.wall,b:point,owner:b,until:t+5,touch:new Set()});
+  b.wall=point;
+  const own=beams.filter(l=>l.owner===b);if(own.length>4)beams.splice(beams.indexOf(own[0]),1);
+}
+function move(b,dt,skills=true){
+  b.x+=b.vx*dt;b.y+=b.vy*dt;
+  const x=b.x<R?0:b.x>W-R?W:null,y=b.y<R?0:b.y>W-R?W:null;
+  if(x!==null){b.x=x===0?2*R-b.x:2*(W-R)-b.x;b.vx*=-1;}
+  if(y!==null){b.y=y===0?2*R-b.y:2*(W-R)-b.y;b.vy*=-1;}
+  if(skills&&(x!==null||y!==null)){
+    if(x!==null)wallHit(b,x===0?'left':'right',x,clamp(b.y,R,W-R));
+    else wallHit(b,y===0?'top':'bottom',clamp(b.x,R,W-R),y);
+  }
+}
+function push(b,x,y,speed){b.vx=x*speed;b.vy=y*speed;}
+function distLine(p,l){const dx=l.b.x-l.a.x,dy=l.b.y-l.a.y;
+  const k=clamp(((p.x-l.a.x)*dx+(p.y-l.a.y)*dy)/(dx*dx+dy*dy),0,1);
+  return hypot(p.x-l.a.x-k*dx,p.y-l.a.y-k*dy);
+}
+function finish(){
+  state='end';stop();const [a,b]=balls,timeout=a.hp>0&&b.hp>0;
+  const margin=timeout?a.hp*b.type.hp-b.hp*a.type.hp:a.hp-b.hp;
+  pixel($('outcome'),margin===0?'平手':margin>0?'你贏了':'電腦獲勝');
+  $('reason').textContent=timeout?'時間到，依剩餘血量比例判定。':margin===0?'雙方同時耗盡血量。':'其中一方血量歸零。';
+  $('hint').textContent='對戰結束';$('result').hidden=false;$('again').focus();
+}
+function update(dt){
+  t+=dt;
+  const [a,b]=balls;
+  if(grip){
+    const {vamp,target}=grip;
+    move(vamp,dt);
+    let x=clamp(vamp.x+grip.x*(2*R-1),R,W-R),y=clamp(vamp.y+grip.y*(2*R-1),R,W-R);
+    if(hypot(x-vamp.x,y-vamp.y)<R){grip.x*=-1;grip.y*=-1;x=clamp(vamp.x+grip.x*(2*R-1),R,W-R);y=clamp(vamp.y+grip.y*(2*R-1),R,W-R);}
+    target.x=x;target.y=y;
+    while(grip.ticks<3&&t>=grip.next){if(target.hp>0){change(target,-1);change(vamp,1);}grip.next+=.4;grip.ticks++;}
+    if(t>=grip.end){
+      const n=vec(target,vamp),nx=n.n?n.x:grip.x,ny=n.n?n.y:grip.y;
+      push(target,nx,ny,215);push(vamp,-nx,-ny,215);
+      vamp.ready=t+1.35;grip=null;contact=true;
+    }
+  }else{
+    for(const ball of balls)move(ball,dt);
+    const n=vec(b,a),nx=n.n?n.x:1,ny=n.y;
+    for(const [w,o,sgn] of [[a,b,1],[b,a,-1]]){
+      if(w.type.id==='wave'&&n.n<=2*R+17&&t>=w.ready){
+        w.ready=t+4;change(o,-2);push(o,sgn*nx,sgn*ny,290);burst(w,46);
+      }
+    }
+    if(n.n<=2*R){
+      const closing=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny;
+      const correction=(2*R-n.n+.2)/2;
+      a.x=clamp(a.x-correction*nx,R,W-R);a.y=clamp(a.y-correction*ny,R,W-R);
+      b.x=clamp(b.x+correction*nx,R,W-R);b.y=clamp(b.y+correction*ny,R,W-R);
+      if(closing>0){a.vx-=closing*nx;a.vy-=closing*ny;b.vx+=closing*nx;b.vy+=closing*ny;}
+      if(!contact){
+        for(const [s,o,sgn] of [[a,b,1],[b,a,-1]]){
+          if(s.type.id==='tank'){change(o,-1);change(s,-1);}
+          if(s.type.id==='charge'&&s.energy===3){s.energy=0;change(o,-5);push(o,sgn*nx,sgn*ny,350);burst(s,40);}
+        }
+        const vamp=balls.find(s=>s.type.id==='vamp'&&t>=s.ready&&s.hp>0);
+        if(vamp){const target=vamp===a?b:a,dir=vamp===a?1:-1;
+          if(target.hp>0){grip={vamp,target,x:nx*dir,y:ny*dir,next:t+.4,end:t+1.2,ticks:0};target.ready=target.type.id==='vamp'?t+2.55:target.ready;}
+        }
+      }
+      contact=true;
+    }else if(n.n>2*R+1)contact=false;
+    for(const ball of balls){
+      const s=hypot(ball.vx,ball.vy);
+      if(s>0&&(s<120||s>400)){const k=clamp(s,120,400)/s;ball.vx*=k;ball.vy*=k;}
+      else if(s===0){ball.vx=ball===a?120:-120;}
+    }
+  }
+  beams=beams.filter(l=>l.until>t);
+  for(const l of beams)for(const s of balls)if(s!==l.owner){
+    const d=distLine(s,l);if(d<=R&&!l.touch.has(s)){l.touch.add(s);change(s,-2);}
+    else if(d>R+2)l.touch.delete(s);
+  }
+  floats=floats.filter(f=>t-f.start<.65);sparks=sparks.filter(f=>t-f.start<.3);
+  if(Math.floor(t*40)!==Math.floor((t-dt)*40))for(const s of balls){s.trail.push([s.x,s.y]);if(s.trail.length>7)s.trail.shift();}
+  if(t>=TIME||balls.some(s=>s.hp<=0))finish();
+}
+function frame(now){
+  if(state!=='run')return;
+  if(last)acc+=Math.min((now-last)/1000,.06);
+  last=now;
+  while(acc>=STEP&&state==='run'){update(STEP);acc-=STEP;}
+  hud();render();
+  if(state==='run')raf=requestAnimationFrame(frame);
+}
+function line(x,y,X,Y,color,width=1){
+  ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(X,Y);ctx.stroke();
+}
+function sprite(b,x=b.x,y=b.y,aim=false){
+  x=Math.round(x);y=Math.round(y);
+  ctx.fillStyle=b.flash>t?'#fff':b.type.color;
+  for(const [off,width,high] of [[-13,12,2],[-11,20,3],[-8,24,3],[-5,26,10],[5,24,3],[8,20,3],[11,12,2]])ctx.fillRect(x-width/2,y+off,width,high);
+  ctx.fillStyle='#111117';ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.hp,x,y+1);
+  if(aim)return;
+  if(b.type.id==='charge')for(let i=0;i<3;i++){ctx.fillStyle=i<b.energy?b.type.color:'#504130';ctx.fillRect(x-10+i*7,y-19,5,3);}
+  if(b.type.id==='wave'&&t>=b.ready){ctx.strokeStyle=b.type.color;ctx.strokeRect(x-16.5,y-16.5,33,33);}
+  if(b.type.id==='laser'&&b.wall){ctx.fillStyle=b.type.color;ctx.fillRect(clamp(b.wall.x-2,0,W-4),clamp(b.wall.y-2,0,W-4),4,4);}
+}
+function render(){
+  ctx.clearRect(0,0,W,W);
+  if(!balls.length)return;
+  for(const l of beams){
+    ctx.globalAlpha=clamp((l.until-t)*2,.12,1);
+    line(l.a.x,l.a.y,l.b.x,l.b.y,l.owner.type.color,2);
+    ctx.fillStyle='#fff';for(const p of [l.a,l.b])ctx.fillRect(clamp(p.x-2,0,W-4),clamp(p.y-2,0,W-4),4,4);
+  }
+  ctx.globalAlpha=1;
+  if(state==='idle'){
+    const a=drag?.origin||balls[0];sprite(balls[0],a.x,a.y,true);
+    const v=drag?vec(drag.raw,drag.end):keyAim?{x:Math.cos(keyAim.a),y:Math.sin(keyAim.a),n:keyAim.n}:null;
+    if(v&&v.n>=5){
+      const power=clamp((v.n-5)/120,0,1),len=27+power*77;
+      const x=a.x+v.x*len,y=a.y+v.y*len,c=balls[0].type.color;
+      if(drag){ctx.setLineDash([3,4]);line(a.x,a.y,drag.end.x,drag.end.y,'#898995');ctx.setLineDash([]);}
+      line(a.x+v.x*15,a.y+v.y*15,x,y,c,2);
+      line(x,y,x-v.x*8-v.y*5,y-v.y*8+v.x*5,c,2);
+      line(x,y,x-v.x*8+v.y*5,y-v.y*8-v.x*5,c,2);
+      ctx.fillStyle='#242429';ctx.fillRect(142,371,116,8);ctx.fillStyle=c;ctx.fillRect(142,371,Math.max(4,116*power),8);
+    }
+    return;
+  }
+  if(grip)line(grip.vamp.x,grip.vamp.y,grip.target.x,grip.target.y,'#ff5778',7);
+  for(const s of balls){
+    for(const [i,[x,y]] of s.trail.entries()){
+      ctx.globalAlpha=(i+1)*.043;ctx.fillStyle=s.type.color;ctx.fillRect(Math.round(x)-3,Math.round(y)-3,6,6);
+    }ctx.globalAlpha=1;sprite(s);
+  }
+  for(const f of sparks){const u=(t-f.start)/.3,r=10+u*f.r;ctx.globalAlpha=1-u;ctx.strokeStyle=f.color;ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<8;i++){const a=Math.PI/8+i*Math.PI/4,x=f.x+Math.cos(a)*r,y=f.y+Math.sin(a)*r;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();ctx.stroke();}
+  for(const f of floats){const u=(t-f.start)/.65;ctx.globalAlpha=1-u;ctx.fillStyle=f.color;ctx.font='bold 15px monospace';ctx.textAlign='center';ctx.fillText(f.label,clamp(f.x,14,W-14),clamp(f.y-17-u*20,9,W-9));}
+  ctx.globalAlpha=1;
+}
+</script>
+</body>
+</html>
