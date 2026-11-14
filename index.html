@@ -30,7 +30,7 @@
 <div class="fighter" id="fighter1"><small>CPU</small> <span id="name1"></span> <span id="hp1" class="hptext"></span><div class="track"><i></i></div></div>
 </div>
 <div class="field">
-<canvas id="arena" class="arena" width="400" height="400" tabindex="0" aria-label="競技場。按住框內選定起點，向發射方向的反方向拖曳後放開。鍵盤可用方向鍵選發射方向、加減鍵調力道、空白鍵發射。"></canvas>
+<canvas id="arena" class="arena" width="300" height="300" tabindex="0" aria-label="競技場。按住框內選定起點，向發射方向的反方向拖曳後放開。鍵盤可用方向鍵選發射方向、加減鍵調力道、空白鍵發射。"></canvas>
 <div class="result" id="result" hidden><div><h2 id="outcome"></h2><p id="reason"></p><button id="again" class="primary"><span data-pixel="再戰一場"></span></button></div></div>
 </div>
 <div class="controls"><span id="hint" class="hint" aria-live="polite"></span><div><button id="reset" class="secondary">重開</button><button id="back" class="secondary">換球</button></div></div>
@@ -74,12 +74,12 @@ $('enter').onclick=()=>{if(!selection)return;const pool=types.filter(t=>t!==sele
 $('back').onclick=()=>{show('select');$('roster').querySelector('[aria-pressed=true]').focus();};
 $('again').onclick=$('reset').onclick=()=>reset();
 
-const W=400,R=13,TIME=75, STEP=1/180, cv=$('arena'), ctx=cv.getContext('2d');
+const W=300,R=13,TIME=75, STEP=1/180, cv=$('arena'), ctx=cv.getContext('2d');
 const hypot=Math.hypot, clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 let balls=[], beams=[], sparks=[], floats=[], grip=null, t=0, contact=false, drag=null, state='idle', raf=0,last=0,acc=0,keyAim=null;
 function make(type,x,y){return {type,x,y,vx:0,vy:0,hp:type.hp,ready:0,energy:0,wall:null,trail:[],flash:0};}
 function reset(){
-  stop();balls=[make(selection,120,200),make(matchRival,300,200)];beams=[];sparks=[];floats=[];grip=null;t=0;contact=false;drag=null;keyAim=null;state='idle';$('result').hidden=true;
+  stop();balls=[make(selection,W*.30,W/2),make(matchRival,W*.75,W/2)];beams=[];sparks=[];floats=[];grip=null;t=0;contact=false;drag=null;keyAim=null;state='idle';$('result').hidden=true;
   for(const [i,b] of balls.entries()){pixel($('name'+i),b.type.name);$('fighter'+i).style.setProperty('--ball',b.type.color);}
   $('hint').textContent='按住框內起點，向後拉，放開發射。';hud();render();cv.focus({preventScroll:true});
 }
@@ -94,12 +94,13 @@ function hud(){
 function point(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left-cv.clientLeft)*W/cv.clientWidth,y:(e.clientY-r.top-cv.clientTop)*W/cv.clientHeight};}
 function legal(p){return{x:clamp(p.x,R+1,W-R-1),y:clamp(p.y,R+1,W-R-1)};}
 function vec(a,b){const x=a.x-b.x,y=a.y-b.y,n=hypot(x,y);return{x:n?x/n:0,y:n?y/n:0,n};}
+function pullVector(d,end){const v=vec(d.raw,end);v.n*=400/W;return v;}
 function launch(p,v){
   if(state!=='idle'||v.n<5)return;
   drag=null;keyAim=null;state='run';const speed=clamp(125+v.n*2.15,140,390);
   Object.assign(balls[0],{x:p.x,y:p.y,vx:v.x*speed,vy:v.y*speed});
   const right=p.x<W/2;
-  const cpu={x:right?300:100,y:clamp(p.y+(p.y>W/2?-48:48),R+1,W-R-1)};
+  const cpu={x:right?W*.75:W*.25,y:clamp(p.y+(p.y>W/2?-48:48),R+1,W-R-1)};
   const d=vec(p,cpu),a=Math.atan2(d.y,d.x)+(Math.random()-.5)*.36;
   Object.assign(balls[1],{...cpu,vx:Math.cos(a)*235,vy:Math.sin(a)*235});
   $('hint').textContent='對戰中 · 球會自動反彈與施放技能';
@@ -114,7 +115,7 @@ cv.addEventListener('pointerdown',e=>{
 cv.addEventListener('pointermove',e=>{if(drag?.id!==e.pointerId)return;drag.end=point(e);render();});
 cv.addEventListener('pointerup',e=>{
   if(drag?.id!==e.pointerId)return;const d=drag;drag=null;
-  launch(d.origin,vec(d.raw,point(e)));render();
+  launch(d.origin,pullVector(d,point(e)));render();
 });
 for(const ev of ['pointercancel','lostpointercapture'])cv.addEventListener(ev,e=>{if(drag?.id===e.pointerId){drag=null;render();}});
 cv.addEventListener('keydown',e=>{
@@ -251,7 +252,7 @@ function render(){
   ctx.globalAlpha=1;
   if(state==='idle'){
     const a=drag?.origin||balls[0];sprite(balls[0],a.x,a.y,true);
-    const v=drag?vec(drag.raw,drag.end):keyAim?{x:Math.cos(keyAim.a),y:Math.sin(keyAim.a),n:keyAim.n}:null;
+    const v=drag?pullVector(drag,drag.end):keyAim?{x:Math.cos(keyAim.a),y:Math.sin(keyAim.a),n:keyAim.n}:null;
     if(v&&v.n>=5){
       const power=clamp((v.n-5)/120,0,1),len=27+power*77;
       const x=a.x+v.x*len,y=a.y+v.y*len,c=balls[0].type.color;
@@ -259,7 +260,7 @@ function render(){
       line(a.x+v.x*15,a.y+v.y*15,x,y,c,2);
       line(x,y,x-v.x*8-v.y*5,y-v.y*8+v.x*5,c,2);
       line(x,y,x-v.x*8+v.y*5,y-v.y*8-v.x*5,c,2);
-      ctx.fillStyle='#242429';ctx.fillRect(142,371,116,8);ctx.fillStyle=c;ctx.fillRect(142,371,Math.max(4,116*power),8);
+      ctx.fillStyle='#242429';ctx.fillRect(W/2-58,W-29,116,8);ctx.fillStyle=c;ctx.fillRect(W/2-58,W-29,Math.max(4,116*power),8);
     }
     return;
   }
