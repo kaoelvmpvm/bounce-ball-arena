@@ -9,7 +9,7 @@
 :root{color-scheme:dark;--accent:#dbff68;--muted:#b0b0ba;--edge:#323239;font-family:system-ui,sans-serif;background:#000;color:#fff}*{box-sizing:border-box}body{margin:0}button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,canvas:focus-visible{outline:2px solid #fff;outline-offset:4px}button:disabled{cursor:not-allowed;opacity:.4}[hidden]{display:none!important}
 .screen{width:min(100% - 36px,840px);margin:auto}.home{min-height:100svh;display:grid;place-items:center}.px{height:1em;width:auto;display:inline-block;vertical-align:middle;fill:currentColor;shape-rendering:crispEdges}.primary{border:2px solid var(--accent);background:var(--accent);color:#080b00;padding:13px 22px;box-shadow:5px 5px 0 #61782a;font-size:20px}.primary:hover{background:#ecffa9}.home .primary{font-size:clamp(28px,7vw,44px);padding:20px 32px;box-shadow:8px 8px 0 #61782a}
 .select-screen{padding-block:clamp(24px,8vh,74px)}.eyebrow,.hud small,.controls,.counter{font-family:monospace;letter-spacing:.12em;font-weight:700}.eyebrow{color:var(--accent);font-size:14px;margin:0 0 12px}h1{margin:0;font-size:clamp(31px,7vw,52px)}.intro{color:var(--muted);margin:16px 0 24px}.roster{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.card{grid-column:span 2;text-align:left;min-height:116px;background:#101014;border:1px solid var(--edge);color:white;padding:12px;position:relative}.card:hover,.card[aria-pressed=true]{border-color:var(--ball);background:#18181e}.card[aria-pressed=true]{box-shadow:inset 3px 0 var(--ball)}.card-top{display:flex;align-items:center;gap:10px}.orb{width:24px;height:24px;background:var(--ball);clip-path:polygon(25% 0,75% 0,75% 12.5%,87.5% 12.5%,87.5% 25%,100% 25%,100% 75%,87.5% 75%,87.5% 87.5%,75% 87.5%,75% 100%,25% 100%,25% 87.5%,12.5% 87.5%,12.5% 75%,0 75%,0 25%,12.5% 25%,12.5% 12.5%,25% 12.5%);flex:none}.card b{font-size:18px}.card small{display:block;color:var(--muted);font-size:13px;line-height:1.5;margin-top:8px}.counter{font-size:11px;color:var(--ball);margin-top:6px;display:block}.choose-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:22px;flex-wrap:wrap}.choose-footer label{color:var(--muted);display:flex;align-items:center;gap:8px}select,.secondary{background:#101014;border:1px solid #595963;color:#fff;padding:8px 10px}.secondary:hover{border-color:#fff}
-.play{width:min(100% - 28px,570px, max(350px,100svh - 172px));padding:14px 0 18px}.hud{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;margin-bottom:10px}.fighter:last-child{text-align:right}.hud small{font-size:11px;color:var(--muted)}.hptext{font:bold 12px monospace;white-space:nowrap}.track{margin-top:5px;background:#29292d;height:7px}.track i{display:block;height:100%;width:100%;background:var(--ball)}.fighter:last-child .track i{margin-left:auto}.timer{font:700 20px monospace;color:#fff}.field{position:relative}.arena{display:block;width:100%;aspect-ratio:1;background:#000;border:2px solid #fff;touch-action:none;image-rendering:pixelated;cursor:crosshair}.controls{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:12px;font-size:13px}.controls div{display:flex;gap:5px;flex-shrink:0}.controls button{white-space:nowrap}.controls #sound[aria-pressed=false]{color:var(--muted)}.hint{color:var(--muted);line-height:1.45;letter-spacing:0}.result{position:absolute;inset:2px;display:grid;place-items:center;background:#000c;text-align:center}.result h2{font-size:35px;margin:0;color:var(--accent)}.result p{color:var(--muted);margin:14px 0 20px}.result .primary{font-size:16px}
+.play{width:min(100% - 28px,570px, max(350px,100svh - 172px));padding:14px 0 18px}.hud{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;margin-bottom:10px}.fighter:last-child{text-align:right}.hud small{font-size:11px;color:var(--muted)}.hptext{font:bold 12px monospace;white-space:nowrap}.track{margin-top:5px;background:#29292d;height:7px}.track i{display:block;height:100%;width:100%;background:var(--ball)}.fighter:last-child .track i{margin-left:auto}.timer{font:700 20px monospace;color:#fff}.field{position:relative}.arena{display:block;width:100%;aspect-ratio:1;background:#000;touch-action:none;image-rendering:pixelated;cursor:crosshair}.controls{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:12px;font-size:13px}.controls div{display:flex;gap:5px;flex-shrink:0}.controls button{white-space:nowrap}.controls #sound[aria-pressed=false]{color:var(--muted)}.hint{color:var(--muted);line-height:1.45;letter-spacing:0}.result{position:absolute;inset:2px;display:grid;place-items:center;background:#000c;text-align:center}.result h2{font-size:35px;margin:0;color:var(--accent)}.result p{color:var(--muted);margin:14px 0 20px}.result .primary{font-size:16px}
 @media(max-width:600px){.roster{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.card{grid-column:span 1;min-height:106px;padding:10px}.card b{font-size:16px}.card small{font-size:12px}.choose-footer{gap:12px}.hud{gap:8px}}@media(max-width:340px){.choose-footer{align-items:flex-start;flex-direction:column}.controls{flex-wrap:wrap}}
 
 .progress{font:700 10px monospace;color:var(--muted);margin-top:5px;letter-spacing:.08em}.progress.ready{color:var(--accent)}.loadouts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;font-size:11px;color:var(--muted);line-height:1.5}.loadouts span:last-child{text-align:right}
@@ -21,7 +21,7 @@
 <main>
 <section id="home" class="screen home"><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.3.3 · TOWER RUN</p>
+<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.3.4 · TOWER RUN</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
 <p class="intro">選一顆球開始爬塔。每層清完敵人才可升級，剩餘血量會帶到下一層。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
@@ -30,12 +30,12 @@
 <section id="play" class="screen play" hidden>
 <div class="tower-head"><div id="floorLabel" class="eyebrow"></div><div id="floorEnemy" class="hint"></div></div>
 <div class="hud">
-<div class="fighter" id="fighter0"><small>1P</small> <span id="name0"></span> <span id="hp0" class="hptext"></span><div class="track"><i></i></div></div>
+<div class="fighter" id="fighter0"><small>1P</small> <span id="name0"></span> <span id="hp0" class="hptext"></span><div class="track"><i></i></div><div id="reboundHeal" class="progress"></div></div>
 <div class="timer" id="timer">75</div>
 <div class="fighter" id="fighter1"><small>敵方</small> <span id="name1"></span> <span id="hp1" class="hptext"></span><div class="track"><i></i></div><div id="walls1" class="progress"></div></div>
 </div>
 <div class="field">
-<canvas id="arena" class="arena" width="200" height="200" tabindex="0" aria-label="競技場。按住框內選定起點，向發射方向的反方向拖曳後放開。鍵盤可用方向鍵選發射方向、加減鍵調力道、空白鍵發射。"></canvas>
+<canvas id="arena" class="arena" width="200" height="200" tabindex="0" aria-label="十邊形競技場。按住場內選定起點，向發射方向的反方向拖曳後放開。鍵盤可用方向鍵選發射方向、加減鍵調力道、空白鍵發射。"></canvas>
 <div id="draft" class="draft" role="dialog" aria-modal="true" aria-labelledby="draftTitle" hidden><div>
 <div class="eyebrow" id="draftRound"></div><h2 id="draftTitle">選擇能力</h2><p id="draftInfo"></p><div class="offers" id="offers"></div>
 </div></div>
@@ -89,6 +89,32 @@ $('reset').onclick=()=>{
 
 const W=200,R=13,TIME=75, STEP=1/240, cv=$('arena'), ctx=cv.getContext('2d');
 const hypot=Math.hypot, clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const C=W/2, RIM_RADIUS=C-3, BASE_SPEED_GAIN=1.05, DODGE_MAX=75;
+const vertices=Array.from({length:10},(_,i)=>{
+  const a=-Math.PI/2+Math.PI/10+i*Math.PI/5;
+  return {x:C+RIM_RADIUS*Math.cos(a),y:C+RIM_RADIUS*Math.sin(a)};
+});
+const walls=vertices.map((a,i)=>{
+  const b=vertices[(i+1)%vertices.length], dx=b.x-a.x,dy=b.y-a.y,n=hypot(dx,dy);
+  const nx=dy/n,ny=-dx/n;
+  return {id:i,nx,ny,limit:(a.x-C)*nx+(a.y-C)*ny};
+});
+const wallDot=(p,w)=>(p.x-C)*w.nx+(p.y-C)*w.ny;
+function inside(p,pad=0){return walls.every(w=>wallDot(p,w)<=w.limit-pad+1e-7);}
+function inset(p,pad){
+  let k=1;
+  for(const w of walls){
+    const d=wallDot(p,w);
+    if(d>w.limit-pad)k=Math.min(k,(w.limit-pad)/d);
+  }
+  return k===1?{x:p.x,y:p.y}:{x:C+(p.x-C)*k,y:C+(p.y-C)*k};
+}
+function place(b,x,y){const p=inset({x,y},R);b.x=p.x;b.y=p.y;}
+function arenaPath(){
+  ctx.beginPath();
+  vertices.forEach(({x,y},i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+  ctx.closePath();
+}
 const reducedMotion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
 let audio=null,soundOn=true,shake=null,lastHaptic=-Infinity;
 const lastTone={wall:-Infinity,body:-Infinity,crit:-Infinity};
@@ -166,9 +192,9 @@ const enemies={
   dummy:{id:'dummy',name:'訓練球',color:'#dedee7'},
   grunt:{id:'grunt',name:'撞擊球',color:'#ff966b'}
 };
-const newRun=()=>({floor:1,power:0,speed:0,equipment:{},entryHp:0,drainCharge:0});
+const newRun=()=>({floor:1,power:0,speed:0,dodge:0,equipment:{},entryHp:0,drainCharge:0});
 let run=newRun();
-const gearOrder=['satellite','regen','drain','shield','blade','mine','spike','armor','echo'];
+const gearOrder=['blade','regen','drain','shield','mine','spike','armor','echo'];
 const REPAIR_RATE=.30, CLEAR_HEAL_RATE=.10;
 const gearCount=id=>run.equipment[id]||0;
 const persistentMaxHp=()=>selection.hp+4*gearCount('armor');
@@ -183,14 +209,14 @@ function floorSpec(n){
   return ['無盡層',roster.map(([id,hp])=>[id,hp+3*(n-10)])];
 }
 function make(type,x,y,team=0,id=0){
-  return {id,team,type,x,y,pressure:0,vx:0,vy:0,hp:type.hp,maxHp:type.hp,up:{},shield:0,shieldWalls:0,spikeAt:0,mineWalls:0,bladeWalls:0,mines:[],echoes:[],satellites:[],ready:0,energy:0,laserReady:new Map(),wall:null,trail:[],flash:0};
+  return {id,team,type,x,y,pressure:0,vx:0,vy:0,hp:type.hp,maxHp:type.hp,up:{},shield:0,shieldWalls:0,spikeAt:0,mineWalls:0,bladeWalls:0,mines:[],echoes:[],healWalls:0,ready:0,energy:0,laserReady:new Map(),wall:null,trail:[],flash:0};
 }
 function reset(remainingHp=run.entryHp||selection.hp){
   shake?.cancel();shake=null;stop();closeDraft();
   const [label,list]=floorSpec(run.floor);
   balls=[make(selection,W*.25,W/2)];
   list.forEach(([id,hp],i)=>balls.push(make({...enemies[id],hp},W*.76,W*(i+1)/(list.length+1),1,i+1)));
-  for(const enemy of balls.slice(1))enemy.pressure=run.floor>=5?Math.floor((run.floor-2)/3):0;
+  for(const enemy of balls.slice(1)){place(enemy,enemy.x,enemy.y);enemy.pressure=run.floor>=5?Math.floor((run.floor-2)/3):0;}
   beams=[];sparks=[];floats=[];shots=[];particles=[];draftOptions=[];contacts=new Set();grip=null;t=0;drag=null;keyAim=null;state='idle';
   for(const card of cards)for(let i=0;i<gearCount(card.id);i++)grant(balls[0],card);
   balls[0].hp=clamp(remainingHp,0,balls[0].maxHp);
@@ -201,7 +227,7 @@ function reset(remainingHp=run.entryHp||selection.hp){
   $('floorLabel').textContent='第 '+run.floor+' 層 · '+label;
   $('floorEnemy').textContent=list.map(([id])=>enemies[id].name).join(' ＋ ');
   $('result').hidden=true;
-  $('hint').textContent='按住框內起點，向後拉，放開發射。';
+  $('hint').textContent='按住場內起點，向後拉，放開發射。';
   hud();render();cv.focus({preventScroll:true});
 }
 function stop(){cancelAnimationFrame(raf);raf=0;}
@@ -209,6 +235,7 @@ function hud(){
   const b=balls[0],others=balls.slice(1),alive=others.filter(o=>o.hp>0);
   $('timer').textContent=String(Math.max(0,Math.ceil(TIME-t))).padStart(2,'0');
   $('hp0').textContent=b.hp+'/'+b.maxHp;
+  $('reboundHeal').textContent='回血 '+b.healWalls+'/5 · 閃避 '+run.dodge+'%';
   $('fighter0').querySelector('.track i').style.width=100*b.hp/b.maxHp+'%';
   const hp=others.reduce((n,o)=>n+o.hp,0),max=others.reduce((n,o)=>n+o.maxHp,0);
   $('name1').textContent='剩 '+alive.length+' 顆';
@@ -222,19 +249,19 @@ function hud(){
   $('loadout1').textContent=owned.length?'起始裝備 · '+owned.join('／'):'';
 }
 function point(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left-cv.clientLeft)*W/cv.clientWidth,y:(e.clientY-r.top-cv.clientTop)*W/cv.clientHeight};}
-function legal(p){return{x:clamp(p.x,R+1,W-R-1),y:clamp(p.y,R+1,W-R-1)};}
+function legal(p){return inset(p,R+1);}
 function vec(a,b){const x=a.x-b.x,y=a.y-b.y,n=hypot(x,y);return{x:n?x/n:0,y:n?y/n:0,n};}
 function pullVector(d,end){const v=vec(d.raw,end);v.n*=400/W;return v;}
 function launch(p,v){
   if(state!=='idle'||v.n<5)return;
   unlockSound();drag=null;keyAim=null;state='run';
-  const speed=clamp(125+v.n*2.15,140,390)*1.10*speedScale(balls[0]);
-  Object.assign(balls[0],{x:p.x,y:p.y,vx:v.x*speed,vy:v.y*speed});
+  const speed=clamp(125+v.n*2.15,140,390)*1.10*BASE_SPEED_GAIN*speedScale(balls[0]);
+  Object.assign(balls[0],{...legal(p),vx:v.x*speed,vy:v.y*speed});
   const side=p.x<W/2?W*.77:W*.23;
   balls.slice(1).forEach((b,i)=>{
-    b.x=side;b.y=W*(i+1)/balls.length;
+    place(b,side,W*(i+1)/balls.length);
     const d=vec(p,b),a=Math.atan2(d.y,d.x)+(Math.random()-.5)*.36;
-    const v=b.type.id==='dummy'?195:258+Math.min(40,(run.floor-1)*2.5);
+    const v=BASE_SPEED_GAIN*(b.type.id==='dummy'?195:258+Math.min(40,(run.floor-1)*2.5));
     b.vx=Math.cos(a)*v;b.vy=Math.sin(a)*v;
   });
   $('hint').textContent='對戰中 · 擊倒所有敵人即可通關';
@@ -242,7 +269,7 @@ function launch(p,v){
 }
 cv.addEventListener('pointerdown',e=>{
   if(state!=='idle'||drag||e.button!==0)return;
-  const p=point(e);if(p.x<0||p.y<0||p.x>W||p.y>W)return;
+  const p=point(e);if(!inside(p))return;
   cv.setPointerCapture(e.pointerId);keyAim=null;
   drag={id:e.pointerId,origin:legal(p),raw:p,end:p};render();
 });
@@ -265,7 +292,6 @@ const cards=[
   {id:'armor',name:'加厚外殼',desc:'最大血量 +4，並回復 4 點。可重複疊加。'},
   {id:'shield',name:'緊急護盾',desc:'每層讓下一次護盾多抵消 3 點傷害。消耗後再撞牆 5 次恢復。'},
   {id:'spike',name:'尖刺外殼',desc:'每層讓球身碰撞額外扣 1 點，間隔至少 1 秒。'},
-  {id:'satellite',name:'旋轉衛星',desc:'每層新增 1 顆衛星。每顆命中扣 1 點，各自冷卻 1.2 秒。'},
   {id:'mine',name:'牆角地雷',desc:'每撞牆 3 次放一顆，命中扣 2 點，維持 5 秒。每層多保留 1 顆。'},
   {id:'echo',name:'殘影陷阱',desc:'被撞後留下殘影，1 秒後啟動、維持 2 秒。命中扣 2 點，每層多保留 1 個。'},
   {id:'blade',name:'飛行刀片',desc:'每撞牆 4 次沿反彈方向射出刀片，每層多射 1 枚。命中扣 2 點，撞牆消失。'}
@@ -276,16 +302,16 @@ function grant(b,c){
   b.up[c.id]=count(b,c.id)+1;
   if(c.id==='armor'){b.maxHp+=4;change(b,4);}
   if(c.id==='shield'){b.shield=3*count(b,'shield');b.shieldWalls=0;}
-  if(c.id==='satellite')b.satellites.push({ready:0});
 }
 function closeDraft(){
   $('draft').hidden=true;$('offers').replaceChildren();$('reset').disabled=false;$('back').disabled=false;$('sound').disabled=false;cv.inert=false;
 }
 function chooseCard(i){
-  if(state!=='reward'||!draftOptions[i])return;
+  if(state!=='reward'||!draftOptions[i]||draftOptions[i].disabled)return;
   const choice=draftOptions[i];
   let hp=choice.carryHp;
   if(choice.id==='repair')hp+=choice.heal;
+  else if(choice.id==='dodge')run.dodge=Math.min(DODGE_MAX,run.dodge+2);
   else if(choice.id==='gear')run.equipment[choice.gearId]=gearCount(choice.gearId)+1;
   else run[choice.id]++;
   run.floor++;reset(hp);
@@ -295,7 +321,7 @@ function openDraft(options,title,info,round){
   $('draftTitle').textContent=title;$('draftInfo').textContent=info;$('draftRound').textContent=round;
   $('offers').replaceChildren();
   options.forEach((c,index)=>{
-    const button=document.createElement('button');button.className='offer';
+    const button=document.createElement('button');button.className='offer';button.disabled=Boolean(c.disabled);
     button.innerHTML='<kbd></kbd><span><b></b><small></small></span>';
     button.querySelector('kbd').textContent=index+1;
     button.querySelector('b').textContent=c.name;
@@ -315,20 +341,24 @@ function offerReward(){
     {id:'power',name:'力量',desc:'往後每層，本體碰撞傷害 +1，爆擊率 +3 個百分點（最高 100%）。'},
     {id:'speed',name:'速度',desc:'往後每層，基準球速 +8%。'},
     {id:'gear',gearId,name:'裝備 · '+equipment.name,desc:special?equipment.desc:'往後每層開場自帶此裝備 1 層。'+equipment.desc},
-    {id:'repair',heal,name:'修復包',desc:'一次性回復最大血量的 30%。'+(heal?'這次回復 '+heal+' HP。':'目前血量已滿。')}
+    {id:'repair',heal,name:'修復包',desc:'一次性回復最大血量的 30%。'+(heal?'這次回復 '+heal+' HP。':'目前血量已滿。')},
+    {id:'dodge',name:'閃避',disabled:run.dodge>=DODGE_MAX,desc:run.dodge>=DODGE_MAX?'已達 75% 上限。':'受擊時有機率不扣血。'+run.dodge+'% → '+Math.min(DODGE_MAX,run.dodge+2)+'%（最高 75%）。'}
   ].map(choice=>({...choice,carryHp}));
-  openDraft(options,'通關獎勵 · 四選一','下層帶入 '+carryHp+'/'+max+' HP'+(clearHeal?'（含再生 +'+clearHeal+'）':'')+'。','第 '+run.floor+' 層通關');
+  openDraft(options,'通關獎勵 · 五選一','下層帶入 '+carryHp+'/'+max+' HP'+(clearHeal?'（含再生 +'+clearHeal+'）':'')+'。','第 '+run.floor+' 層通關');
   $('hint').textContent='選擇一項永久強化，或現在補血。';
 }
 $('draft').addEventListener('keydown',e=>{
-  if(/^[1-4]$/.test(e.key)&&Number(e.key)<=draftOptions.length){e.preventDefault();chooseCard(Number(e.key)-1);}
+  if(/^[1-5]$/.test(e.key)&&Number(e.key)<=draftOptions.length){e.preventDefault();chooseCard(Number(e.key)-1);}
   if(e.key==='Tab'){
-    const buttons=[...$('offers').children],i=buttons.indexOf(document.activeElement);
+    const buttons=[...$('offers').children].filter(b=>!b.disabled),i=buttons.indexOf(document.activeElement);
     e.preventDefault();buttons[(i+(e.shiftKey?-1:1)+buttons.length)%buttons.length]?.focus();
   }
 });
-function orbit(b,i){const angle=t*5+(b===balls[0]?0:Math.PI)+i*2*Math.PI/b.satellites.length;return {x:b.x+Math.cos(angle)*24,y:b.y+Math.sin(angle)*24};}
 function change(b,delta,selfCost=false){
+  if(delta<0&&!selfCost&&b.team===0&&b.hp>0&&run.dodge&&Math.random()<run.dodge/100){
+    floats.push({x:b.x,y:b.y,start:t,label:'閃避',color:'#70f9ec',dodge:true});
+    return 0;
+  }
   if(delta<0&&!selfCost&&b.shield){
     delta+=Math.min(-delta,b.shield);b.shield=0;b.shieldWalls=0;burst(b,24);
   }
@@ -338,9 +368,10 @@ function change(b,delta,selfCost=false){
 }
 function burst(b,r){sparks.push({x:b.x,y:b.y,start:t,r,color:b.type.color});}
 function wallHit(b,side,x,y){
+  if(b.team===0&&++b.healWalls===5){b.healWalls=0;change(b,1);}
   if(count(b,'shield')&&!b.shield&&++b.shieldWalls>=5){b.shield=3*count(b,'shield');b.shieldWalls=0;burst(b,24);}
   if(count(b,'mine')&&++b.mineWalls%3===0){
-    b.mines.push({x:clamp(x,6,W-6),y:clamp(y,6,W-6),start:t,until:t+5});
+    b.mines.push({...inset({x,y},6),start:t,until:t+5});
     if(b.mines.length>count(b,'mine'))b.mines.shift();
   }
   if(count(b,'blade')&&++b.bladeWalls%4===0){
@@ -361,15 +392,31 @@ function wallHit(b,side,x,y){
   const own=beams.filter(l=>l.owner===b);if(own.length>laserCap)beams.splice(beams.indexOf(own[0]),1);
 }
 function move(b,dt,skills=true){
-  b.x+=b.vx*dt;b.y+=b.vy*dt;
-  const x=b.x<R?0:b.x>W-R?W:null,y=b.y<R?0:b.y>W-R?W:null;
-  if(x!==null){b.x=x===0?2*R-b.x:2*(W-R)-b.x;b.vx*=-1;}
-  if(y!==null){b.y=y===0?2*R-b.y:2*(W-R)-b.y;b.vy*=-1;}
-  if(skills&&(x!==null||y!==null)){
-    const dx=x===null?0:x===0?1:-1,dy=y===null?0:y===0?1:-1;
-    impact('wall',dx,dy,hypot(dx*b.vx,dy*b.vy),b===balls[0]);
-    if(x!==null)wallHit(b,x===0?'left':'right',x,clamp(b.y,R,W-R));
-    else wallHit(b,y===0?'top':'bottom',clamp(b.x,R,W-R),y);
+  // Sweep the ball center against each edge offset inward by its radius.
+  // A simultaneous vertex hit is a single impact.
+  let remaining=dt;
+  for(let bounce=0;bounce<12&&remaining>1e-9;bounce++){
+    let time=remaining,hit=null,corner=false;
+    for(const w of walls){
+      const outward=b.vx*w.nx+b.vy*w.ny;
+      if(outward<=1e-8)continue;
+      const contact=Math.max(0,w.limit-R-wallDot(b,w))/outward;
+      if(contact<time-1e-9||(!hit&&contact<=time)){
+        time=contact;hit=w;corner=false;
+      }else if(hit&&Math.abs(time-contact)<=1e-9)corner=true;
+    }
+    b.x+=b.vx*time;b.y+=b.vy*time;
+    if(!hit)break;
+    remaining-=time;
+    const outward=b.vx*hit.nx+b.vy*hit.ny;
+    const x=b.x+hit.nx*R,y=b.y+hit.ny*R;
+    if(corner){b.vx=-b.vx;b.vy=-b.vy;}
+    else{b.vx-=2*outward*hit.nx;b.vy-=2*outward*hit.ny;}
+    place(b,b.x-hit.nx*1e-6,b.y-hit.ny*1e-6);
+    if(skills){
+      impact('wall',-hit.nx,-hit.ny,outward,b===balls[0]);
+      wallHit(b,hit.id,x,y);
+    }
   }
 }
 // Retain each ball's own speed when redirecting it. A skill may set a higher speed.
@@ -447,10 +494,11 @@ function update(dt){
   }
   if(grip){
     const {vamp,target}=grip;
-    const tx=clamp(vamp.x+grip.x*(2*R-1),R,W-R),ty=clamp(vamp.y+grip.y*(2*R-1),R,W-R);
-    if(hypot(tx-vamp.x,ty-vamp.y)<R){grip.x*=-1;grip.y*=-1;}
-    target.x=clamp(vamp.x+grip.x*(2*R-1),R,W-R);
-    target.y=clamp(vamp.y+grip.y*(2*R-1),R,W-R);
+    place(target,vamp.x+grip.x*(2*R-1),vamp.y+grip.y*(2*R-1));
+    if(hypot(target.x-vamp.x,target.y-vamp.y)<R){
+      grip.x*=-1;grip.y*=-1;
+      place(target,vamp.x+grip.x*(2*R-1),vamp.y+grip.y*(2*R-1));
+    }
     while(grip.ticks<vampTicks&&t>=grip.next){
       if(target.hp>0){const drained=-change(target,-1);if(drained)change(vamp,drained);}
       grip.next+=.4;grip.ticks++;
@@ -478,8 +526,8 @@ function update(dt){
       continue;
     }
     const closing=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny,correction=(2*R-n.n+.2)/2;
-    a.x=clamp(a.x-correction*nx,R,W-R);a.y=clamp(a.y-correction*ny,R,W-R);
-    b.x=clamp(b.x+correction*nx,R,W-R);b.y=clamp(b.y+correction*ny,R,W-R);
+    place(a,a.x-correction*nx,a.y-correction*ny);
+    place(b,b.x+correction*nx,b.y+correction*ny);
     bouncePair(a,b,nx,ny,closing);
     if(contacts.has(key))continue;
     contacts.add(key);
@@ -494,7 +542,7 @@ function update(dt){
     }
   }
   for(const s of active){
-    const v=hypot(s.vx,s.vy),min=132*speedScale(s);
+    const v=hypot(s.vx,s.vy),min=132*BASE_SPEED_GAIN*speedScale(s);
     if(v<min)redirect(s,s.vx,s.vy,min,s.team?-1:1,0);
   }
   beams=beams.filter(l=>l.until>t&&l.owner.hp>0);
@@ -507,11 +555,6 @@ function update(dt){
   }
   for(const s of active){
     if(s.hp<=0)continue;
-    for(const [i,satellite] of s.satellites.entries()){
-      if(t<satellite.ready)continue;
-      const p=orbit(s,i),o=activeOpponents(s).find(o=>hypot(p.x-o.x,p.y-o.y)<=R+4);
-      if(o){change(o,-1);satellite.ready=t+1.2;}
-    }
     for(const key of ['mines','echoes'])if(s[key].length)s[key]=s[key].filter(trap=>{
       if(t>=trap.until)return false;
       const o=t>=trap.start&&activeOpponents(s).find(o=>hypot(trap.x-o.x,trap.y-o.y)<=R+7);
@@ -521,7 +564,7 @@ function update(dt){
   }
   shots=shots.filter(p=>{
     p.x+=p.vx*dt;p.y+=p.vy*dt;
-    if(p.owner.hp<=0||t>=p.until||p.x<0||p.x>W||p.y<0||p.y>W)return false;
+    if(p.owner.hp<=0||t>=p.until||!inside(p))return false;
     const o=activeOpponents(p.owner).find(o=>hypot(p.x-o.x,p.y-o.y)<=R+3);
     if(o){change(o,-2);return false;}
     return true;
@@ -567,6 +610,7 @@ function sprite(b,x=b.x,y=b.y,aim=false){
 function render(){
   ctx.clearRect(0,0,W,W);
   if(!balls.length)return;
+  ctx.save();arenaPath();ctx.clip();
   for(const l of beams){
     ctx.globalAlpha=clamp((l.until-t)*2,.12,1);
     line(l.a.x,l.a.y,l.b.x,l.b.y,l.owner.type.color,2);
@@ -586,13 +630,12 @@ function render(){
       line(x,y,x-v.x*8+v.y*5,y-v.y*8-v.x*5,c,2);
       ctx.fillStyle='#242429';ctx.fillRect(W/2-58,W-29,116,8);ctx.fillStyle=c;ctx.fillRect(W/2-58,W-29,Math.max(4,116*power),8);
     }
-    return;
+    endArena();return;
   }
   for(const s of balls){
     if(s.hp<=0)continue;
     for(const mine of s.mines){ctx.fillStyle=s.type.color;ctx.fillRect(mine.x-5,mine.y-5,10,10);ctx.fillStyle='#fff';ctx.fillRect(mine.x-1,mine.y-1,2,2);}
     for(const echo of s.echoes){ctx.globalAlpha=t<echo.start?.28:.75;ctx.strokeStyle=s.type.color;ctx.setLineDash([3,2]);ctx.strokeRect(echo.x-8,echo.y-8,16,16);ctx.setLineDash([]);ctx.globalAlpha=1;}
-    for(const [i] of s.satellites.entries()){const p=orbit(s,i);line(s.x,s.y,p.x,p.y,s.type.color+'66');ctx.fillStyle=s.type.color;ctx.fillRect(Math.round(p.x)-4,Math.round(p.y)-4,8,8);}
   }
   for(const p of shots){const sp=hypot(p.vx,p.vy);line(p.x-p.vx/sp*8,p.y-p.vy/sp*8,p.x+p.vx/sp*3,p.y+p.vy/sp*3,p.owner.type.color,3);}
   if(grip)line(grip.vamp.x,grip.vamp.y,grip.target.x,grip.target.y,'#ff5778',7);
@@ -609,12 +652,16 @@ function render(){
   }
   for(const f of floats){
     const u=(t-f.start)/(f.crit?.85:.65);ctx.globalAlpha=1-u;ctx.fillStyle=f.color;
-    ctx.font=f.crit?'900 20px system-ui':'bold 15px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
-    const x=clamp(f.x,f.crit?40:14,W-(f.crit?40:14)),y=clamp(f.y-17-u*20,12,W-9);
+    ctx.font=f.crit?'900 20px system-ui':f.dodge?'bold 14px system-ui':'bold 15px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+    const {x,y}=inset({x:f.x,y:f.y-17-u*20},f.crit?22:f.dodge?17:12);
     if(f.crit){ctx.lineWidth=4;ctx.strokeStyle='#3d1e04';ctx.strokeText(f.label,x,y);}
     ctx.fillText(f.label,x,y);
   }
   ctx.globalAlpha=1;
+  endArena();
+}
+function endArena(){
+  ctx.restore();arenaPath();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
 }
 </script>
 </body>
