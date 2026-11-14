@@ -21,9 +21,9 @@
 <main>
 <section id="home" class="screen home"><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.3 · TOWER RUN</p>
+<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.3.1 · TOWER RUN</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
-<p class="intro">選一顆球開始爬塔。撞牆升級只留在當層，通關獎勵則會帶到後面每一層。</p>
+<p class="intro">選一顆球開始爬塔。撞牆能力只留在當層。通關時帶著剩餘血量前進，不會自動補滿。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
 <div class="choose-footer"><span class="hint">TOWER MODE · 從第 1 層開始</span><button class="primary" id="enter" aria-label="開始爬塔" disabled>開始爬塔</button></div>
 </section>
@@ -82,7 +82,10 @@ $('start').onclick=()=>{unlockSound();show('select');$('roster').firstElementChi
 $('enter').onclick=()=>{if(!selection)return;show('play');beginRun();};
 $('back').onclick=()=>{show('select');$('roster').querySelector('[aria-pressed=true]').focus();};
 $('again').onclick=()=>beginRun();
-$('reset').onclick=()=>reset();
+$('reset').onclick=()=>{
+  if(state!=='run'||!balls[0]||balls[0].hp<=0)return;
+  reset(Math.min(run.entryHp,balls[0].hp));
+};
 
 const W=240,R=13,TIME=75, STEP=1/240, cv=$('arena'), ctx=cv.getContext('2d');
 const hypot=Math.hypot, clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
@@ -163,9 +166,17 @@ const enemies={
   dummy:{id:'dummy',name:'訓練球',color:'#dedee7'},
   grunt:{id:'grunt',name:'撞擊球',color:'#ff966b'}
 };
-let run={floor:1,power:0,speed:0,gear:0};
-const gearOrder=['satellite','shield','blade','mine','spike','armor','echo'];
-function beginRun(){run={floor:1,power:0,speed:0,gear:0};reset();}
+const newRun=()=>({floor:1,power:0,speed:0,equipment:{},entryHp:0,drainCharge:0});
+let run=newRun();
+const gearOrder=['satellite','regen','drain','shield','blade','mine','spike','armor','echo'];
+const REPAIR_RATE=.30, CLEAR_HEAL_RATE=.10;
+const gearCount=id=>run.equipment[id]||0;
+const persistentMaxHp=()=>selection.hp+4*gearCount('armor');
+const specialGear={
+  regen:{name:'再生裝置',desc:'每件使往後通關時回復最大血量的 10%。從下一層開始生效。'},
+  drain:{name:'吸血核心',desc:'每件將本體撞擊實際造成傷害的 20% 轉為回血。不含副武器。'}
+};
+function beginRun(){run=newRun();reset(selection.hp);}
 function floorSpec(n){
   if(n<=floors.length)return floors[n-1];
   const roster=floors[7+(n-11)%3][1];
@@ -174,14 +185,16 @@ function floorSpec(n){
 function make(type,x,y,team=0,id=0){
   return {id,team,type,x,y,pressure:0,vx:0,vy:0,hp:type.hp,maxHp:type.hp,up:{},wallHits:0,drafts:0,pending:false,shield:0,shieldWalls:0,spikeAt:0,mineWalls:0,bladeWalls:0,mines:[],echoes:[],satellites:[],tankHits:0,ready:0,energy:0,laserReady:new Map(),wall:null,trail:[],flash:0};
 }
-function reset(){
+function reset(remainingHp=run.entryHp||selection.hp){
   shake?.cancel();shake=null;stop();closeDraft();
   const [label,list]=floorSpec(run.floor);
   balls=[make(selection,W*.25,W/2)];
   list.forEach(([id,hp],i)=>balls.push(make({...enemies[id],hp},W*.76,W*(i+1)/(list.length+1),1,i+1)));
   for(const enemy of balls.slice(1))enemy.pressure=run.floor>=5?Math.floor((run.floor-2)/3):0;
   beams=[];sparks=[];floats=[];shots=[];particles=[];draftOptions=[];contacts=new Set();grip=null;t=0;drag=null;keyAim=null;state='idle';
-  for(let i=0;i<run.gear;i++)grant(balls[0],cards.find(c=>c.id===gearOrder[i%gearOrder.length]));
+  for(const card of cards)for(let i=0;i<gearCount(card.id);i++)grant(balls[0],card);
+  balls[0].hp=clamp(remainingHp,0,balls[0].maxHp);
+  run.entryHp=balls[0].hp;
   floats=[];
   pixel($('name0'),selection.name);$('fighter0').style.setProperty('--ball',selection.color);
   $('fighter1').style.setProperty('--ball',enemies[list[0][0]].color);
@@ -204,7 +217,9 @@ function hud(){
   $('walls0').textContent='撞牆 '+(b.wallHits%6)+'/6 · 本層 '+b.drafts+' 次';
   $('walls0').classList.toggle('ready',b.wallHits%6>=4);
   $('walls1').textContent=alive.map(o=>o.hp+' HP').join(' · ');
-  $('loadout0').textContent='永久 · 力量 '+run.power+' ／ 速度 '+run.speed+' ／ 裝備 '+run.gear;
+  const passives=Object.keys(specialGear).filter(id=>gearCount(id)).map(id=>specialGear[id].name+(gearCount(id)>1?' ×'+gearCount(id):''));
+  const gearTotal=Object.values(run.equipment).reduce((a,b)=>a+b,0);
+  $('loadout0').textContent='永久 · 力量 '+run.power+' ／ 速度 '+run.speed+' ／ 裝備 '+gearTotal+(passives.length?' · '+passives.join('／'):'');
   const owned=cards.filter(c=>c.id!=='heal'&&count(b,c.id)).map(c=>c.name+(count(b,c.id)>1?' ×'+count(b,c.id):''));
   $('loadout1').textContent=owned.length?'目前能力（含起始裝備） · '+owned.join('／'):'';
 }
@@ -285,7 +300,13 @@ function chooseCard(i){
   if(!['draft','reward'].includes(state)||!draftOptions[i])return;
   const choice=draftOptions[i],reward=state==='reward';
   draftOptions=[];closeDraft();
-  if(reward){run[choice.id]++;run.floor++;reset();return;}
+  if(reward){
+    let hp=choice.carryHp;
+    if(choice.id==='repair')hp+=choice.heal;
+    else if(choice.id==='gear')run.equipment[choice.gearId]=gearCount(choice.gearId)+1;
+    else run[choice.id]++;
+    run.floor++;reset(hp);return;
+  }
   grant(balls[0],choice);state='run';
   $('hint').textContent='對戰中 · 每撞牆 6 次可選本層能力';hud();render();
   cv.focus({preventScroll:true});last=0;acc=0;raf=requestAnimationFrame(frame);
@@ -311,16 +332,22 @@ function offerDraft(){
   $('hint').textContent='對戰已暫停 · 選一張能力卡';
 }
 function offerReward(){
-  const equipment=cards.find(c=>c.id===gearOrder[run.gear%gearOrder.length]);
-  openDraft('reward',[
+  const gearId=gearOrder[(run.floor-1)%gearOrder.length];
+  const special=specialGear[gearId],equipment=special||cards.find(c=>c.id===gearId);
+  const max=persistentMaxHp(), hp=clamp(balls[0].hp,0,max);
+  const clearHeal=Math.min(max-hp,Math.round(max*CLEAR_HEAL_RATE*gearCount('regen')));
+  const carryHp=hp+clearHeal,heal=Math.min(max-carryHp,Math.round(max*REPAIR_RATE));
+  const options=[
     {id:'power',name:'力量',desc:'往後每層，本體碰撞傷害 +1，爆擊率 +3 個百分點（最高 100%）。'},
     {id:'speed',name:'速度',desc:'往後每層，基準球速 +8%。'},
-    {id:'gear',name:'裝備',desc:'往後每層開場自帶「'+equipment.name+'」1 層。'}
-  ],'選擇永久升級','本層能力會清空，下一層回滿血並重新發射。','第 '+run.floor+' 層通關');
-  $('hint').textContent='選擇一項升級，帶往後續樓層。';
+    {id:'gear',gearId,name:'裝備 · '+equipment.name,desc:special?equipment.desc:'往後每層開場自帶此裝備 1 層。'+equipment.desc},
+    {id:'repair',heal,name:'修復包',desc:'一次性回復最大血量的 30%。'+(heal?'這次回復 '+heal+' HP。':'目前血量已滿。')}
+  ].map(choice=>({...choice,carryHp}));
+  openDraft('reward',options,'通關獎勵 · 四選一','當層能力會清空，下層帶入 '+carryHp+'/'+max+' HP'+(clearHeal?'（含再生 +'+clearHeal+'）':'')+'。','第 '+run.floor+' 層通關');
+  $('hint').textContent='選擇一項永久強化，或現在補血。';
 }
 $('draft').addEventListener('keydown',e=>{
-  if(/^[1-3]$/.test(e.key)){e.preventDefault();chooseCard(Number(e.key)-1);}
+  if(/^[1-4]$/.test(e.key)&&Number(e.key)<=draftOptions.length){e.preventDefault();chooseCard(Number(e.key)-1);}
   if(e.key==='Tab'){
     const buttons=[...$('offers').children],i=buttons.indexOf(document.activeElement);
     e.preventDefault();buttons[(i+(e.shiftKey?-1:1)+buttons.length)%buttons.length]?.focus();
@@ -423,7 +450,16 @@ function contactAttack(s,o,nx,ny){
     const x=(s.x+o.x)/2,y=(s.y+o.y)/2;
     hitBurst(x,y);floats.push({x,y:y-7,start:t,label:'爆擊！',color:'#ffe168',crit:true});
   }
-  if(damage)change(o,-damage);
+  if(damage){
+    const dealt=-change(o,-damage);
+    if(s.team===0&&s.hp>0&&dealt>0&&gearCount('drain')){
+      // Store units of 1/5 HP so repeated small hits do not lose healing to rounding.
+      run.drainCharge+=dealt*gearCount('drain');
+      const heal=Math.floor(run.drainCharge/5);
+      run.drainCharge%=5;
+      if(heal)change(s,heal);
+    }
+  }
   return crit;
 }
 function activeOpponents(s){return balls.filter(o=>o.hp>0&&o.team!==s.team);}
