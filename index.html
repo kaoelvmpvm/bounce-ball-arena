@@ -21,7 +21,7 @@
 <main>
 <section id="home" class="screen home"><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.3.2 · TOWER RUN</p>
+<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.3.3 · TOWER RUN</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
 <p class="intro">選一顆球開始爬塔。每層清完敵人才可升級，剩餘血量會帶到下一層。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
@@ -372,18 +372,20 @@ function move(b,dt,skills=true){
     else wallHit(b,y===0?'top':'bottom',clamp(b.x,R,W-R),y);
   }
 }
-function push(b,x,y,speed){
-  if(speedScale(b)>1){
-    b.cruise=b.cruise||hypot(b.vx,b.vy)||120*speedScale(b);
-    b.knockEnd=t+.25;
-  }
-  b.vx=x*speed;b.vy=y*speed;
+// Retain each ball's own speed when redirecting it. A skill may set a higher speed.
+function redirect(b,x,y,speed,fallbackX=1,fallbackY=0){
+  const length=hypot(x,y);
+  if(length>1e-8){b.vx=x/length*speed;b.vy=y/length*speed;}
+  else{b.vx=fallbackX*speed;b.vy=fallbackY*speed;}
 }
-function returnToCruise(b){
-  if(!b.cruise||t<b.knockEnd)return;
-  const s=hypot(b.vx,b.vy);
-  if(s){b.vx*=b.cruise/s;b.vy*=b.cruise/s;}
-  b.cruise=0;
+function push(b,x,y,speed){
+  redirect(b,x,y,Math.max(speed,hypot(b.vx,b.vy)),b.team?-1:1,0);
+}
+function bouncePair(a,b,nx,ny,closing){
+  if(closing<=0)return;
+  const speedA=hypot(a.vx,a.vy),speedB=hypot(b.vx,b.vy);
+  redirect(a,a.vx-closing*nx,a.vy-closing*ny,speedA,-nx,-ny);
+  redirect(b,b.vx+closing*nx,b.vy+closing*ny,speedB,nx,ny);
 }
 function distLine(p,l){const dx=l.b.x-l.a.x,dy=l.b.y-l.a.y;
   const k=clamp(((p.x-l.a.x)*dx+(p.y-l.a.y)*dy)/(dx*dx+dy*dy),0,1);
@@ -441,7 +443,7 @@ function update(dt){
   if(grip&&(grip.vamp.hp<=0||grip.target.hp<=0))grip=null;
   for(const s of active){
     if(grip?.target===s)continue;
-    returnToCruise(s);move(s,dt);
+    move(s,dt);
   }
   if(grip){
     const {vamp,target}=grip;
@@ -478,7 +480,7 @@ function update(dt){
     const closing=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny,correction=(2*R-n.n+.2)/2;
     a.x=clamp(a.x-correction*nx,R,W-R);a.y=clamp(a.y-correction*ny,R,W-R);
     b.x=clamp(b.x+correction*nx,R,W-R);b.y=clamp(b.y+correction*ny,R,W-R);
-    if(closing>0){a.vx-=closing*nx;a.vy-=closing*ny;b.vx+=closing*nx;b.vy+=closing*ny;}
+    bouncePair(a,b,nx,ny,closing);
     if(contacts.has(key))continue;
     contacts.add(key);
     if(a.team===b.team)continue;
@@ -492,10 +494,8 @@ function update(dt){
     }
   }
   for(const s of active){
-    const v=hypot(s.vx,s.vy),scale=speedScale(s),min=132*scale,max=440*scale;
-    if(t<(s.knockEnd||0)&&v>0)continue;
-    if(!v)s.vx=(s.team?-1:1)*min;
-    else if(v<min||v>max){const k=clamp(v,min,max)/v;s.vx*=k;s.vy*=k;}
+    const v=hypot(s.vx,s.vy),min=132*speedScale(s);
+    if(v<min)redirect(s,s.vx,s.vy,min,s.team?-1:1,0);
   }
   beams=beams.filter(l=>l.until>t&&l.owner.hp>0);
   for(const l of beams)for(const s of activeOpponents(l.owner)){
