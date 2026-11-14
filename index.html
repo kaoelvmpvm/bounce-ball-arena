@@ -11,13 +11,16 @@
 .select-screen{padding-block:clamp(24px,8vh,74px)}.eyebrow,.hud small,.controls,.counter{font-family:monospace;letter-spacing:.12em;font-weight:700}.eyebrow{color:var(--accent);font-size:14px;margin:0 0 12px}h1{margin:0;font-size:clamp(31px,7vw,52px)}.intro{color:var(--muted);margin:16px 0 24px}.roster{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.card{grid-column:span 2;text-align:left;min-height:116px;background:#101014;border:1px solid var(--edge);color:white;padding:12px;position:relative}.card:hover,.card[aria-pressed=true]{border-color:var(--ball);background:#18181e}.card[aria-pressed=true]{box-shadow:inset 3px 0 var(--ball)}.card-top{display:flex;align-items:center;gap:10px}.orb{width:24px;height:24px;background:var(--ball);clip-path:polygon(25% 0,75% 0,75% 12.5%,87.5% 12.5%,87.5% 25%,100% 25%,100% 75%,87.5% 75%,87.5% 87.5%,75% 87.5%,75% 100%,25% 100%,25% 87.5%,12.5% 87.5%,12.5% 75%,0 75%,0 25%,12.5% 25%,12.5% 12.5%,25% 12.5%);flex:none}.card b{font-size:18px}.card small{display:block;color:var(--muted);font-size:13px;line-height:1.5;margin-top:8px}.counter{font-size:11px;color:var(--ball);margin-top:6px;display:block}.choose-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:22px;flex-wrap:wrap}.choose-footer label{color:var(--muted);display:flex;align-items:center;gap:8px}select,.secondary{background:#101014;border:1px solid #595963;color:#fff;padding:8px 10px}.secondary:hover{border-color:#fff}
 .play{width:min(100% - 28px,570px, max(350px,100svh - 172px));padding:14px 0 18px}.hud{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;margin-bottom:10px}.fighter:last-child{text-align:right}.hud small{font-size:11px;color:var(--muted)}.hptext{font:bold 12px monospace;white-space:nowrap}.track{margin-top:5px;background:#29292d;height:7px}.track i{display:block;height:100%;width:100%;background:var(--ball)}.fighter:last-child .track i{margin-left:auto}.timer{font:700 20px monospace;color:#fff}.field{position:relative}.arena{display:block;width:100%;aspect-ratio:1;background:#000;border:2px solid #fff;touch-action:none;image-rendering:pixelated;cursor:crosshair}.controls{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:12px;font-size:13px}.controls div{display:flex;gap:5px;flex-shrink:0}.hint{color:var(--muted);line-height:1.45;letter-spacing:0}.result{position:absolute;inset:2px;display:grid;place-items:center;background:#000c;text-align:center}.result h2{font-size:35px;margin:0;color:var(--accent)}.result p{color:var(--muted);margin:14px 0 20px}.result .primary{font-size:16px}
 @media(max-width:600px){.roster{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.card{grid-column:span 1;min-height:106px;padding:10px}.card b{font-size:16px}.card small{font-size:12px}.choose-footer{gap:12px}.hud{gap:8px}}@media(max-width:340px){.choose-footer{align-items:flex-start;flex-direction:column}.controls{flex-wrap:wrap}}
+
+.progress{font:700 10px monospace;color:var(--muted);margin-top:5px;letter-spacing:.08em}.progress.ready{color:var(--accent)}.loadouts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;font-size:11px;color:var(--muted);line-height:1.5}.loadouts span:last-child{text-align:right}
+.draft{position:absolute;inset:2px;z-index:2;display:grid;align-items:center;overflow:auto;background:#08090dec;padding:12px}.draft h2{margin:3px 0 5px;font-size:clamp(19px,4vw,31px);color:var(--accent)}.draft p{margin:0 0 9px;color:var(--muted);font-size:12px}.offers{display:grid;gap:5px}.offer{display:grid;grid-template-columns:26px 1fr;gap:6px;text-align:left;align-items:center;border:1px solid #545563;background:#181920;color:#fff;padding:5px 8px;min-height:46px}.offer:hover,.offer:focus-visible{border-color:var(--accent);background:#262b16}.offer kbd{font:bold 13px monospace;color:var(--accent);text-align:center}.offer b{display:block;font-size:14px}.offer small{display:block;color:#c4c4cf;font-size:11px;line-height:1.35}
 </style>
 </head>
 <body>
 <main>
 <section id="home" class="screen home"><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.1.1</p>
+<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.2</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
 <p class="intro">選一顆球迎戰電腦。發射後，兩顆球會自動彈跳並發動技能。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
@@ -25,14 +28,18 @@
 </section>
 <section id="play" class="screen play" hidden>
 <div class="hud">
-<div class="fighter" id="fighter0"><small>1P</small> <span id="name0"></span> <span id="hp0" class="hptext"></span><div class="track"><i></i></div></div>
+<div class="fighter" id="fighter0"><small>1P</small> <span id="name0"></span> <span id="hp0" class="hptext"></span><div class="track"><i></i></div><div id="walls0" class="progress"></div></div>
 <div class="timer" id="timer">75</div>
-<div class="fighter" id="fighter1"><small>CPU</small> <span id="name1"></span> <span id="hp1" class="hptext"></span><div class="track"><i></i></div></div>
+<div class="fighter" id="fighter1"><small>CPU</small> <span id="name1"></span> <span id="hp1" class="hptext"></span><div class="track"><i></i></div><div id="walls1" class="progress"></div></div>
 </div>
 <div class="field">
 <canvas id="arena" class="arena" width="300" height="300" tabindex="0" aria-label="競技場。按住框內選定起點，向發射方向的反方向拖曳後放開。鍵盤可用方向鍵選發射方向、加減鍵調力道、空白鍵發射。"></canvas>
+<div id="draft" class="draft" role="dialog" aria-modal="true" aria-labelledby="draftTitle" hidden><div>
+<div class="eyebrow" id="draftRound"></div><h2 id="draftTitle">選擇能力</h2><p>對戰已暫停，選一張卡後繼續。</p><div class="offers" id="offers"></div>
+</div></div>
 <div class="result" id="result" hidden><div><h2 id="outcome"></h2><p id="reason"></p><button id="again" class="primary"><span data-pixel="再戰一場"></span></button></div></div>
 </div>
+<div class="loadouts"><span id="loadout0"></span><span id="loadout1"></span></div>
 <div class="controls"><span id="hint" class="hint" aria-live="polite"></span><div><button id="reset" class="secondary">重開</button><button id="back" class="secondary">換球</button></div></div>
 </section>
 </main>
@@ -77,10 +84,10 @@ $('again').onclick=$('reset').onclick=()=>reset();
 
 const W=300,R=13,TIME=75, STEP=1/180, cv=$('arena'), ctx=cv.getContext('2d');
 const hypot=Math.hypot, clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
-let balls=[], beams=[], sparks=[], floats=[], grip=null, t=0, contact=false, drag=null, state='idle', raf=0,last=0,acc=0,keyAim=null;
-function make(type,x,y){return {type,x,y,vx:0,vy:0,hp:type.hp,ready:0,energy:0,laserReady:0,wall:null,trail:[],flash:0};}
+let balls=[], beams=[], sparks=[], floats=[], shots=[], draftOptions=[], grip=null, t=0, contact=false, drag=null, state='idle', raf=0,last=0,acc=0,keyAim=null;
+function make(type,x,y){return {type,x,y,vx:0,vy:0,hp:type.hp,maxHp:type.hp,up:{},wallHits:0,drafts:0,pending:false,shield:0,shieldWalls:0,spikeAt:0,satelliteAt:0,mineWalls:0,bladeWalls:0,mine:null,echo:null,tankHits:0,ready:0,energy:0,laserReady:0,wall:null,trail:[],flash:0};}
 function reset(){
-  stop();balls=[make(selection,W*.30,W/2),make(matchRival,W*.75,W/2)];beams=[];sparks=[];floats=[];grip=null;t=0;contact=false;drag=null;keyAim=null;state='idle';$('result').hidden=true;
+  stop();balls=[make(selection,W*.30,W/2),make(matchRival,W*.75,W/2)];beams=[];sparks=[];floats=[];shots=[];draftOptions=[];closeDraft();grip=null;t=0;contact=false;drag=null;keyAim=null;state='idle';$('result').hidden=true;
   for(const [i,b] of balls.entries()){pixel($('name'+i),b.type.name);$('fighter'+i).style.setProperty('--ball',b.type.color);}
   $('hint').textContent='按住框內起點，向後拉，放開發射。';hud();render();cv.focus({preventScroll:true});
 }
@@ -88,8 +95,13 @@ function stop(){cancelAnimationFrame(raf);raf=0;}
 function hud(){
   $('timer').textContent=String(Math.max(0,Math.ceil(TIME-t))).padStart(2,'0');
   for(const [i,b] of balls.entries()){
-    $('hp'+i).textContent=b.hp+'/'+b.type.hp;
-    $('fighter'+i).querySelector('.track i').style.width=100*b.hp/b.type.hp+'%';
+    $('hp'+i).textContent=b.hp+'/'+b.maxHp;
+    $('fighter'+i).querySelector('.track i').style.width=100*b.hp/b.maxHp+'%';
+    $('walls'+i).textContent=b.drafts>=3?'能力已滿 · 3/3':'撞牆 '+(b.wallHits%6)+'/6 · '+b.drafts+'/3';
+    $('walls'+i).classList.toggle('ready',b.wallHits%6>=4);
+    const owned=cards.filter(c=>c.id!=='heal'&&b.up[c.id]).map(c=>c.name+(b.up[c.id]>1?' ×'+b.up[c.id]:''));
+    $('loadout'+i).textContent=owned.length?(i===0?'你 · ':'電腦 · ')+owned.join('／'):'';
+
   }
 }
 function point(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left-cv.clientLeft)*W/cv.clientWidth,y:(e.clientY-r.top-cv.clientTop)*W/cv.clientHeight};}
@@ -104,7 +116,7 @@ function launch(p,v){
   const cpu={x:right?W*.75:W*.25,y:clamp(p.y+(p.y>W/2?-48:48),R+1,W-R-1)};
   const d=vec(p,cpu),a=Math.atan2(d.y,d.x)+(Math.random()-.5)*.36;
   Object.assign(balls[1],{...cpu,vx:Math.cos(a)*235,vy:Math.sin(a)*235});
-  $('hint').textContent='對戰中 · 球會自動反彈與施放技能';
+  $('hint').textContent='對戰中 · 每撞牆 6 次可抽卡';
   last=0;acc=0;raf=requestAnimationFrame(frame);
 }
 cv.addEventListener('pointerdown',e=>{
@@ -128,18 +140,102 @@ cv.addEventListener('keydown',e=>{
   else keyAim.n=clamp(keyAim.n+(e.key==='-'?-12:12),10,125);
   render();
 });
-function change(b,delta){
-  const n=clamp(b.hp+delta,0,b.type.hp)-b.hp;b.hp+=n;if(!n)return;
+const cards=[
+  {id:'heal',name:'修復包',max:Infinity,desc:'立即回復最大血量的 20%（四捨五入）。'},
+  {id:'armor',name:'加厚外殼',max:2,desc:'最大血量 +4，並回復 4 點。最多 2 層。'},
+  {id:'speed',name:'加速核心',max:2,desc:'移動速度每層 +8%。不提高技能擊退速度，最多 2 層。'},
+  {id:'shield',name:'緊急護盾',max:1,desc:'抵消下一次傷害最多 3 點。用完再撞牆 5 次恢復。'},
+  {id:'boost',name:'技能超頻',max:1,desc:'強化球種的本命技能。'},
+  {id:'spike',name:'尖刺外殼',max:1,desc:'球身撞到對手時額外扣 1 點，間隔至少 1 秒。'},
+  {id:'satellite',name:'旋轉衛星',max:1,desc:'小球環繞本體，碰到對手扣 1 點，間隔至少 1.2 秒。'},
+  {id:'mine',name:'牆角地雷',max:1,desc:'每撞牆 3 次放一顆。命中扣 2 點，最多 1 顆，5 秒後消失。'},
+  {id:'echo',name:'殘影陷阱',max:1,desc:'被撞後留下殘影，1 秒後啟動、維持 2 秒。命中扣 2 點，最多 1 個。'},
+  {id:'blade',name:'飛行刀片',max:1,desc:'每撞牆 4 次沿反彈方向射出刀片，命中扣 2 點，撞牆消失。'}
+];
+const boostText={tank:'每第 3 次撞到對手，額外扣對手 1 點。',vamp:'吸附結束後冷卻縮短 15%。',laser:'每條雷射多維持 0.2 秒。',charge:'蓄滿後的重撞額外扣對手 1 點。',wave:'震波冷卻縮短 15%。'};
+const count=(b,id)=>b.up[id]||0;
+const speedScale=b=>1+.08*count(b,'speed');
+const skillCooldown=(b,base)=>base*(count(b,'boost')?.85:1);
+function pickOptions(b){
+  const pool=cards.filter(c=>count(b,c.id)<c.max);
+  const offer=[];
+  while(offer.length<3&&pool.length)offer.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
+  return offer;
+}
+function grant(b,c){
+  b.up[c.id]=count(b,c.id)+1;
+  if(c.id==='heal')change(b,Math.round(b.maxHp*.2));
+  if(c.id==='armor'){b.maxHp+=4;change(b,4);}
+  if(c.id==='shield'){b.shield=3;b.shieldWalls=0;}
+  if(c.id==='speed'){const scale=speedScale(b)/(speedScale(b)-.08);if(b.cruise)b.cruise*=scale;else{b.vx*=scale;b.vy*=scale;}}
+}
+function cpuPick(b,offer){
+  const score={heal:b.hp/b.maxHp<.45?8:b.hp/b.maxHp<.78?4:0,armor:4,speed:3,shield:4,boost:3,spike:2,satellite:4,mine:3,echo:2,blade:3};
+  return offer.map(c=>({c,value:score[c.id]+Math.random()*2})).sort((a,b)=>b.value-a.value)[0].c;
+}
+function closeDraft(){
+  $('draft').hidden=true;$('offers').replaceChildren();$('reset').disabled=false;$('back').disabled=false;cv.inert=false;
+}
+function chooseCard(i){
+  if(state!=='draft'||!draftOptions[i])return;
+  grant(balls[0],draftOptions[i]);draftOptions=[];closeDraft();
+  state='run';$('hint').textContent='對戰中 · 每撞牆 6 次可抽卡';hud();render();
+  cv.focus({preventScroll:true});last=0;acc=0;raf=requestAnimationFrame(frame);
+}
+function offerDrafts(){
+  for(const [i,b] of balls.entries()){
+    if(!b.pending)continue;
+    b.pending=false;b.drafts++;
+    const offer=pickOptions(b);
+    if(i===1){grant(b,cpuPick(b,offer));continue;}
+    state='draft';stop();draftOptions=offer;
+    $('draftRound').textContent='升級 '+b.drafts+' / 3';
+    $('offers').replaceChildren();
+    offer.forEach((c,index)=>{
+      const button=document.createElement('button');button.className='offer';
+      button.innerHTML='<kbd></kbd><span><b></b><small></small></span>';
+      button.querySelector('kbd').textContent=index+1;
+      button.querySelector('b').textContent=c.name;
+      button.querySelector('small').textContent=c.id==='boost'?boostText[b.type.id]:c.desc;
+      button.onclick=()=>chooseCard(index);$('offers').append(button);
+    });
+    $('draft').hidden=false;$('reset').disabled=true;$('back').disabled=true;cv.inert=true;
+    $('hint').textContent='對戰已暫停 · 選一張能力卡';
+    $('offers').firstElementChild.focus();
+  }
+}
+$('draft').addEventListener('keydown',e=>{
+  if(/^[1-3]$/.test(e.key)){e.preventDefault();chooseCard(Number(e.key)-1);}
+  if(e.key==='Tab'){
+    const buttons=[...$('offers').children],i=buttons.indexOf(document.activeElement);
+    e.preventDefault();buttons[(i+(e.shiftKey?-1:1)+buttons.length)%buttons.length]?.focus();
+  }
+});
+function orbit(b){const angle=t*5+(b===balls[0]?0:Math.PI);return {x:b.x+Math.cos(angle)*24,y:b.y+Math.sin(angle)*24};}
+function change(b,delta,selfCost=false){
+  if(delta<0&&!selfCost&&b.shield){
+    delta+=Math.min(-delta,b.shield);b.shield=0;b.shieldWalls=0;burst(b,24);
+  }
+  const n=clamp(b.hp+delta,0,b.maxHp)-b.hp;b.hp+=n;if(!n)return 0;
   if(n<0)b.flash=t+.14;
-  floats.push({x:b.x,y:b.y,start:t,label:n>0?'+'+n:String(n),color:n>0?'#dfff69':'#ff7991'});
+  floats.push({x:b.x,y:b.y,start:t,label:n>0?'+'+n:String(n),color:n>0?'#dfff69':'#ff7991'});return n;
 }
 function burst(b,r){sparks.push({x:b.x,y:b.y,start:t,r,color:b.type.color});}
 function wallHit(b,side,x,y){
+  b.wallHits++;
+  if(b.drafts<3&&b.wallHits%6===0)b.pending=true;
+  if(count(b,'shield')&&!b.shield&&++b.shieldWalls>=5){b.shield=3;b.shieldWalls=0;burst(b,24);}
+  if(count(b,'mine')&&++b.mineWalls%3===0)b.mine={x:clamp(x,6,W-6),y:clamp(y,6,W-6),start:t,until:t+5};
+  if(count(b,'blade')&&++b.bladeWalls%4===0){
+    const speed=hypot(b.vx,b.vy)||1,nx=b.vx/speed,ny=b.vy/speed;
+    const v=Math.max(435,speed+100);
+    shots.push({owner:b,x:b.x+nx*4,y:b.y+ny*4,vx:nx*v,vy:ny*v,until:t+1});
+  }
   if(b.type.id==='charge')b.energy=Math.min(3,b.energy+1);
   if(b.type.id!=='laser')return;
   const point={x,y,side};
   if(!b.wall||b.wall.side===side){b.wall=point;return;}
-  if(hypot(b.wall.x-x,b.wall.y-y)>1)beams.push({a:b.wall,b:point,owner:b,until:t+laserLife,touch:new Set()});
+  if(hypot(b.wall.x-x,b.wall.y-y)>1)beams.push({a:b.wall,b:point,owner:b,until:t+laserLife+.2*count(b,'boost'),touch:new Set()});
   b.wall=point;
   const own=beams.filter(l=>l.owner===b);if(own.length>laserCap)beams.splice(beams.indexOf(own[0]),1);
 }
@@ -153,14 +249,26 @@ function move(b,dt,skills=true){
     else wallHit(b,y===0?'top':'bottom',clamp(b.x,R,W-R),y);
   }
 }
-function push(b,x,y,speed){b.vx=x*speed;b.vy=y*speed;}
+function push(b,x,y,speed){
+  if(count(b,'speed')){
+    b.cruise=b.cruise||hypot(b.vx,b.vy)||120*speedScale(b);
+    b.knockEnd=t+.25;
+  }
+  b.vx=x*speed;b.vy=y*speed;
+}
+function returnToCruise(b){
+  if(!b.cruise||t<b.knockEnd)return;
+  const s=hypot(b.vx,b.vy);
+  if(s){b.vx*=b.cruise/s;b.vy*=b.cruise/s;}
+  b.cruise=0;
+}
 function distLine(p,l){const dx=l.b.x-l.a.x,dy=l.b.y-l.a.y;
   const k=clamp(((p.x-l.a.x)*dx+(p.y-l.a.y)*dy)/(dx*dx+dy*dy),0,1);
   return hypot(p.x-l.a.x-k*dx,p.y-l.a.y-k*dy);
 }
 function finish(){
   state='end';stop();const [a,b]=balls,timeout=a.hp>0&&b.hp>0;
-  const margin=timeout?a.hp*b.type.hp-b.hp*a.type.hp:a.hp-b.hp;
+  const margin=timeout?a.hp*b.maxHp-b.hp*a.maxHp:a.hp-b.hp;
   pixel($('outcome'),margin===0?'平手':margin>0?'你贏了':'電腦獲勝');
   $('reason').textContent=timeout?'時間到，依剩餘血量比例判定。':margin===0?'雙方同時耗盡血量。':'其中一方血量歸零。';
   $('hint').textContent='對戰結束';$('result').hidden=false;$('again').focus();
@@ -174,18 +282,18 @@ function update(dt){
     let x=clamp(vamp.x+grip.x*(2*R-1),R,W-R),y=clamp(vamp.y+grip.y*(2*R-1),R,W-R);
     if(hypot(x-vamp.x,y-vamp.y)<R){grip.x*=-1;grip.y*=-1;x=clamp(vamp.x+grip.x*(2*R-1),R,W-R);y=clamp(vamp.y+grip.y*(2*R-1),R,W-R);}
     target.x=x;target.y=y;
-    while(grip.ticks<vampTicks&&t>=grip.next){if(target.hp>0){change(target,-1);change(vamp,1);}grip.next+=.4;grip.ticks++;}
+    while(grip.ticks<vampTicks&&t>=grip.next){if(target.hp>0){const drained=-change(target,-1);if(drained)change(vamp,drained);}grip.next+=.4;grip.ticks++;}
     if(t>=grip.end){
       const n=vec(target,vamp),nx=n.n?n.x:grip.x,ny=n.n?n.y:grip.y;
       push(target,nx,ny,215);push(vamp,-nx,-ny,215);
-      vamp.ready=t+vampCooldown;grip=null;contact=true;
+      vamp.ready=t+skillCooldown(vamp,vampCooldown);grip=null;contact=true;
     }
   }else{
-    for(const ball of balls)move(ball,dt);
+    for(const ball of balls){returnToCruise(ball);move(ball,dt);}
     const n=vec(b,a),nx=n.n?n.x:1,ny=n.y;
     for(const [w,o,sgn] of [[a,b,1],[b,a,-1]]){
       if(w.type.id==='wave'&&n.n<=2*R+17&&t>=w.ready){
-        w.ready=t+waveCooldown;change(o,-waveHit);push(o,sgn*nx,sgn*ny,290);burst(w,46);
+        w.ready=t+skillCooldown(w,waveCooldown);change(o,-waveHit);push(o,sgn*nx,sgn*ny,290);burst(w,46);
       }
     }
     if(n.n<=2*R){
@@ -196,8 +304,10 @@ function update(dt){
       if(closing>0){a.vx-=closing*nx;a.vy-=closing*ny;b.vx+=closing*nx;b.vy+=closing*ny;}
       if(!contact){
         for(const [s,o,sgn] of [[a,b,1],[b,a,-1]]){
-          if(s.type.id==='tank'){change(o,-tankHit);change(s,-1);}
-          if(s.type.id==='charge'&&s.energy===3){s.energy=0;change(o,-chargeHit);push(o,sgn*nx,sgn*ny,350);burst(s,40);}
+          if(s.type.id==='tank'){s.tankHits++;change(o,-tankHit-(count(s,'boost')&&s.tankHits%3===0?1:0));change(s,-1,true);}
+          if(count(s,'spike')&&t>=s.spikeAt){s.spikeAt=t+1;change(o,-1);}
+          if(count(s,'echo'))s.echo={x:s.x,y:s.y,start:t+1,until:t+3};
+          if(s.type.id==='charge'&&s.energy===3){s.energy=0;change(o,-chargeHit-count(s,'boost'));push(o,sgn*nx,sgn*ny,350);burst(s,40);}
         }
         const readyVamps=balls.filter(s=>s.type.id==='vamp'&&t>=s.ready&&s.hp>0);
         // Simultaneous grabs cancel so neither slot gets priority.
@@ -210,7 +320,8 @@ function update(dt){
     }else if(n.n>2*R+1)contact=false;
     for(const ball of balls){
       const s=hypot(ball.vx,ball.vy);
-      if(s>0&&(s<120||s>400)){const k=clamp(s,120,400)/s;ball.vx*=k;ball.vy*=k;}
+      const scale=speedScale(ball);
+      if(s>0&&(s<120*scale||s>400*scale)){const k=clamp(s,120*scale,400*scale)/s;ball.vx*=k;ball.vy*=k;}
       else if(s===0){ball.vx=ball===a?120:-120;}
     }
   }
@@ -219,9 +330,29 @@ function update(dt){
     const d=distLine(s,l);if(d<=R&&!l.touch.has(s)){l.touch.add(s);if(t>=s.laserReady){change(s,-laserHit);s.laserReady=t+laserCooldown;}}
     else if(d>R+2)l.touch.delete(s);
   }
+  for(const [s,o] of [[a,b],[b,a]]){
+    if(count(s,'satellite')&&t>=s.satelliteAt){
+      const p=orbit(s);
+      if(hypot(p.x-o.x,p.y-o.y)<=R+4){change(o,-1);s.satelliteAt=t+1.2;}
+    }
+    for(const key of ['mine','echo']){
+      const trap=s[key];
+      if(!trap)continue;
+      if(t>=trap.until)s[key]=null;
+      else if(t>=trap.start&&hypot(trap.x-o.x,trap.y-o.y)<=R+7){change(o,-2);s[key]=null;}
+    }
+  }
+  shots=shots.filter(p=>{
+    p.x+=p.vx*dt;p.y+=p.vy*dt;
+    if(t>=p.until||p.x<0||p.x>W||p.y<0||p.y>W)return false;
+    const o=p.owner===a?b:a;
+    if(hypot(p.x-o.x,p.y-o.y)<=R+3){change(o,-2);return false;}
+    return true;
+  });
   floats=floats.filter(f=>t-f.start<.65);sparks=sparks.filter(f=>t-f.start<.3);
   if(Math.floor(t*40)!==Math.floor((t-dt)*40))for(const s of balls){s.trail.push([s.x,s.y]);if(s.trail.length>7)s.trail.shift();}
   if(t>=TIME||balls.some(s=>s.hp<=0))finish();
+  else if(balls.some(s=>s.pending))offerDrafts();
 }
 function frame(now){
   if(state!=='run')return;
@@ -240,6 +371,15 @@ function sprite(b,x=b.x,y=b.y,aim=false){
   for(const [off,width,high] of [[-13,12,2],[-11,20,3],[-8,24,3],[-5,26,10],[5,24,3],[8,20,3],[11,12,2]])ctx.fillRect(x-width/2,y+off,width,high);
   ctx.fillStyle='#111117';ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.hp,x,y+1);
   if(aim)return;
+  if(b.shield){ctx.strokeStyle='#7af5ec';ctx.strokeRect(x-18.5,y-18.5,37,37);}
+  if(count(b,'spike')){
+    ctx.fillStyle='#fff3a0';
+    for(let i=0;i<8;i++){
+      const a=i*Math.PI/4;ctx.beginPath();
+      for(const [d,r] of [[-.13,12],[0,18],[.13,12]]){const px=x+Math.cos(a+d)*r,py=y+Math.sin(a+d)*r;d===-.13?ctx.moveTo(px,py):ctx.lineTo(px,py);}
+      ctx.fill();
+    }
+  }
   if(b.type.id==='charge')for(let i=0;i<3;i++){ctx.fillStyle=i<b.energy?b.type.color:'#504130';ctx.fillRect(x-10+i*7,y-19,5,3);}
   if(b.type.id==='wave'&&t>=b.ready){ctx.strokeStyle=b.type.color;ctx.strokeRect(x-16.5,y-16.5,33,33);}
   if(b.type.id==='laser'&&b.wall){ctx.fillStyle=b.type.color;ctx.fillRect(clamp(b.wall.x-2,0,W-4),clamp(b.wall.y-2,0,W-4),4,4);}
@@ -267,6 +407,12 @@ function render(){
     }
     return;
   }
+  for(const s of balls){
+    if(s.mine){ctx.fillStyle=s.type.color;ctx.fillRect(s.mine.x-5,s.mine.y-5,10,10);ctx.fillStyle='#fff';ctx.fillRect(s.mine.x-1,s.mine.y-1,2,2);}
+    if(s.echo){ctx.globalAlpha=t<s.echo.start?.28:.75;ctx.strokeStyle=s.type.color;ctx.setLineDash([3,2]);ctx.strokeRect(s.echo.x-8,s.echo.y-8,16,16);ctx.setLineDash([]);ctx.globalAlpha=1;}
+    if(count(s,'satellite')){const p=orbit(s);line(s.x,s.y,p.x,p.y,s.type.color+'66');ctx.fillStyle=s.type.color;ctx.fillRect(Math.round(p.x)-4,Math.round(p.y)-4,8,8);}
+  }
+  for(const p of shots){const sp=hypot(p.vx,p.vy);line(p.x-p.vx/sp*8,p.y-p.vy/sp*8,p.x+p.vx/sp*3,p.y+p.vy/sp*3,p.owner.type.color,3);}
   if(grip)line(grip.vamp.x,grip.vamp.y,grip.target.x,grip.target.y,'#ff5778',7);
   for(const s of balls){
     for(const [i,[x,y]] of s.trail.entries()){
