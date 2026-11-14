@@ -14,28 +14,28 @@
 
 .progress{font:700 10px monospace;color:var(--muted);margin-top:5px;letter-spacing:.08em}.progress.ready{color:var(--accent)}.loadouts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;font-size:11px;color:var(--muted);line-height:1.5}.loadouts span:last-child{text-align:right}
 .draft{position:absolute;inset:2px;z-index:2;display:grid;align-items:center;overflow:auto;background:#08090dec;padding:12px}.draft h2{margin:3px 0 5px;font-size:clamp(19px,4vw,31px);color:var(--accent)}.draft p{margin:0 0 9px;color:var(--muted);font-size:12px}.offers{display:grid;gap:5px}.offer{display:grid;grid-template-columns:26px 1fr;gap:6px;text-align:left;align-items:center;border:1px solid #545563;background:#181920;color:#fff;padding:5px 8px;min-height:46px}.offer:hover,.offer:focus-visible{border-color:var(--accent);background:#262b16}.offer kbd{font:bold 13px monospace;color:var(--accent);text-align:center}.offer b{display:block;font-size:14px}.offer small{display:block;color:#c4c4cf;font-size:11px;line-height:1.35}
-.tower-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.tower-head .eyebrow{margin:0}.tower-head .hint{font-size:12px;text-align:right}.loadouts{grid-template-columns:1fr}.loadouts span:last-child{text-align:left}.controls{flex-wrap:wrap}.result>div{padding:12px}.play{max-width:500px}
+.tower-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.tower-head .eyebrow{margin:0}.tower-head .hint{font-size:12px;text-align:right}.loadouts{grid-template-columns:1fr}.loadouts span:last-child{text-align:left}.controls{flex-wrap:wrap}.result>div{padding:12px}.play{max-width:440px}
 </style>
 </head>
 <body>
 <main>
 <section id="home" class="screen home"><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.3.1 · TOWER RUN</p>
+<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.3.2 · TOWER RUN</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
-<p class="intro">選一顆球開始爬塔。撞牆能力只留在當層。通關時帶著剩餘血量前進，不會自動補滿。</p>
+<p class="intro">選一顆球開始爬塔。每層清完敵人才可升級，剩餘血量會帶到下一層。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
 <div class="choose-footer"><span class="hint">TOWER MODE · 從第 1 層開始</span><button class="primary" id="enter" aria-label="開始爬塔" disabled>開始爬塔</button></div>
 </section>
 <section id="play" class="screen play" hidden>
 <div class="tower-head"><div id="floorLabel" class="eyebrow"></div><div id="floorEnemy" class="hint"></div></div>
 <div class="hud">
-<div class="fighter" id="fighter0"><small>1P</small> <span id="name0"></span> <span id="hp0" class="hptext"></span><div class="track"><i></i></div><div id="walls0" class="progress"></div></div>
+<div class="fighter" id="fighter0"><small>1P</small> <span id="name0"></span> <span id="hp0" class="hptext"></span><div class="track"><i></i></div></div>
 <div class="timer" id="timer">75</div>
 <div class="fighter" id="fighter1"><small>敵方</small> <span id="name1"></span> <span id="hp1" class="hptext"></span><div class="track"><i></i></div><div id="walls1" class="progress"></div></div>
 </div>
 <div class="field">
-<canvas id="arena" class="arena" width="240" height="240" tabindex="0" aria-label="競技場。按住框內選定起點，向發射方向的反方向拖曳後放開。鍵盤可用方向鍵選發射方向、加減鍵調力道、空白鍵發射。"></canvas>
+<canvas id="arena" class="arena" width="200" height="200" tabindex="0" aria-label="競技場。按住框內選定起點，向發射方向的反方向拖曳後放開。鍵盤可用方向鍵選發射方向、加減鍵調力道、空白鍵發射。"></canvas>
 <div id="draft" class="draft" role="dialog" aria-modal="true" aria-labelledby="draftTitle" hidden><div>
 <div class="eyebrow" id="draftRound"></div><h2 id="draftTitle">選擇能力</h2><p id="draftInfo"></p><div class="offers" id="offers"></div>
 </div></div>
@@ -87,7 +87,7 @@ $('reset').onclick=()=>{
   reset(Math.min(run.entryHp,balls[0].hp));
 };
 
-const W=240,R=13,TIME=75, STEP=1/240, cv=$('arena'), ctx=cv.getContext('2d');
+const W=200,R=13,TIME=75, STEP=1/240, cv=$('arena'), ctx=cv.getContext('2d');
 const hypot=Math.hypot, clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const reducedMotion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
 let audio=null,soundOn=true,shake=null,lastHaptic=-Infinity;
@@ -183,7 +183,7 @@ function floorSpec(n){
   return ['無盡層',roster.map(([id,hp])=>[id,hp+3*(n-10)])];
 }
 function make(type,x,y,team=0,id=0){
-  return {id,team,type,x,y,pressure:0,vx:0,vy:0,hp:type.hp,maxHp:type.hp,up:{},wallHits:0,drafts:0,pending:false,shield:0,shieldWalls:0,spikeAt:0,mineWalls:0,bladeWalls:0,mines:[],echoes:[],satellites:[],tankHits:0,ready:0,energy:0,laserReady:new Map(),wall:null,trail:[],flash:0};
+  return {id,team,type,x,y,pressure:0,vx:0,vy:0,hp:type.hp,maxHp:type.hp,up:{},shield:0,shieldWalls:0,spikeAt:0,mineWalls:0,bladeWalls:0,mines:[],echoes:[],satellites:[],ready:0,energy:0,laserReady:new Map(),wall:null,trail:[],flash:0};
 }
 function reset(remainingHp=run.entryHp||selection.hp){
   shake?.cancel();shake=null;stop();closeDraft();
@@ -214,14 +214,12 @@ function hud(){
   $('name1').textContent='剩 '+alive.length+' 顆';
   $('hp1').textContent=hp+'/'+max;
   $('fighter1').querySelector('.track i').style.width=100*hp/max+'%';
-  $('walls0').textContent='撞牆 '+(b.wallHits%6)+'/6 · 本層 '+b.drafts+' 次';
-  $('walls0').classList.toggle('ready',b.wallHits%6>=4);
   $('walls1').textContent=alive.map(o=>o.hp+' HP').join(' · ');
   const passives=Object.keys(specialGear).filter(id=>gearCount(id)).map(id=>specialGear[id].name+(gearCount(id)>1?' ×'+gearCount(id):''));
   const gearTotal=Object.values(run.equipment).reduce((a,b)=>a+b,0);
   $('loadout0').textContent='永久 · 力量 '+run.power+' ／ 速度 '+run.speed+' ／ 裝備 '+gearTotal+(passives.length?' · '+passives.join('／'):'');
-  const owned=cards.filter(c=>c.id!=='heal'&&count(b,c.id)).map(c=>c.name+(count(b,c.id)>1?' ×'+count(b,c.id):''));
-  $('loadout1').textContent=owned.length?'目前能力（含起始裝備） · '+owned.join('／'):'';
+  const owned=cards.filter(c=>count(b,c.id)).map(c=>c.name+(count(b,c.id)>1?' ×'+count(b,c.id):''));
+  $('loadout1').textContent=owned.length?'起始裝備 · '+owned.join('／'):'';
 }
 function point(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left-cv.clientLeft)*W/cv.clientWidth,y:(e.clientY-r.top-cv.clientTop)*W/cv.clientHeight};}
 function legal(p){return{x:clamp(p.x,R+1,W-R-1),y:clamp(p.y,R+1,W-R-1)};}
@@ -239,7 +237,7 @@ function launch(p,v){
     const v=b.type.id==='dummy'?195:258+Math.min(40,(run.floor-1)*2.5);
     b.vx=Math.cos(a)*v;b.vy=Math.sin(a)*v;
   });
-  $('hint').textContent='對戰中 · 每撞牆 6 次可選本層能力';
+  $('hint').textContent='對戰中 · 擊倒所有敵人即可通關';
   last=0;acc=0;raf=requestAnimationFrame(frame);
 }
 cv.addEventListener('pointerdown',e=>{
@@ -264,72 +262,48 @@ cv.addEventListener('keydown',e=>{
   render();
 });
 const cards=[
-  {id:'heal',name:'修復包',desc:'立即回復最大血量的 20%（四捨五入）。'},
   {id:'armor',name:'加厚外殼',desc:'最大血量 +4，並回復 4 點。可重複疊加。'},
-  {id:'speed',name:'加速核心',desc:'移動速度每層 +8%。不提高技能擊退速度。'},
   {id:'shield',name:'緊急護盾',desc:'每層讓下一次護盾多抵消 3 點傷害。消耗後再撞牆 5 次恢復。'},
-  {id:'boost',name:'技能超頻',desc:'強化球種的本命技能。'},
   {id:'spike',name:'尖刺外殼',desc:'每層讓球身碰撞額外扣 1 點，間隔至少 1 秒。'},
   {id:'satellite',name:'旋轉衛星',desc:'每層新增 1 顆衛星。每顆命中扣 1 點，各自冷卻 1.2 秒。'},
   {id:'mine',name:'牆角地雷',desc:'每撞牆 3 次放一顆，命中扣 2 點，維持 5 秒。每層多保留 1 顆。'},
   {id:'echo',name:'殘影陷阱',desc:'被撞後留下殘影，1 秒後啟動、維持 2 秒。命中扣 2 點，每層多保留 1 個。'},
   {id:'blade',name:'飛行刀片',desc:'每撞牆 4 次沿反彈方向射出刀片，每層多射 1 枚。命中扣 2 點，撞牆消失。'}
 ];
-const boostText={tank:'每第 3 次撞到對手，每層額外扣對手 1 點。',vamp:'每層讓吸附冷卻縮至原本的 85%。',laser:'每層讓雷射多維持 0.2 秒。',charge:'每層讓蓄滿後的重撞額外扣對手 1 點。',wave:'每層讓震波冷卻縮至原本的 85%。'};
 const count=(b,id)=>b.up[id]||0;
-const speedScale=b=>1+.08*count(b,'speed')+(b.team===0?.08*run.speed:0);
-const skillCooldown=(b,base)=>base*.85**count(b,'boost');
-function pickOptions(){
-  const pool=[...cards];
-  const offer=[];
-  while(offer.length<3&&pool.length)offer.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
-  return offer;
-}
+const speedScale=b=>b.team===0?1+.08*run.speed:1;
 function grant(b,c){
   b.up[c.id]=count(b,c.id)+1;
-  if(c.id==='heal')change(b,Math.round(b.maxHp*.2));
   if(c.id==='armor'){b.maxHp+=4;change(b,4);}
   if(c.id==='shield'){b.shield=3*count(b,'shield');b.shieldWalls=0;}
   if(c.id==='satellite')b.satellites.push({ready:0});
-  if(c.id==='speed'){const scale=speedScale(b)/(speedScale(b)-.08);if(b.cruise)b.cruise*=scale;else{b.vx*=scale;b.vy*=scale;}}
 }
 function closeDraft(){
   $('draft').hidden=true;$('offers').replaceChildren();$('reset').disabled=false;$('back').disabled=false;$('sound').disabled=false;cv.inert=false;
 }
 function chooseCard(i){
-  if(!['draft','reward'].includes(state)||!draftOptions[i])return;
-  const choice=draftOptions[i],reward=state==='reward';
-  draftOptions=[];closeDraft();
-  if(reward){
-    let hp=choice.carryHp;
-    if(choice.id==='repair')hp+=choice.heal;
-    else if(choice.id==='gear')run.equipment[choice.gearId]=gearCount(choice.gearId)+1;
-    else run[choice.id]++;
-    run.floor++;reset(hp);return;
-  }
-  grant(balls[0],choice);state='run';
-  $('hint').textContent='對戰中 · 每撞牆 6 次可選本層能力';hud();render();
-  cv.focus({preventScroll:true});last=0;acc=0;raf=requestAnimationFrame(frame);
+  if(state!=='reward'||!draftOptions[i])return;
+  const choice=draftOptions[i];
+  let hp=choice.carryHp;
+  if(choice.id==='repair')hp+=choice.heal;
+  else if(choice.id==='gear')run.equipment[choice.gearId]=gearCount(choice.gearId)+1;
+  else run[choice.id]++;
+  run.floor++;reset(hp);
 }
-function openDraft(kind,options,title,info,round){
-  state=kind;stop();draftOptions=options;
+function openDraft(options,title,info,round){
+  state='reward';stop();draftOptions=options;
   $('draftTitle').textContent=title;$('draftInfo').textContent=info;$('draftRound').textContent=round;
   $('offers').replaceChildren();
   options.forEach((c,index)=>{
     const button=document.createElement('button');button.className='offer';
     button.innerHTML='<kbd></kbd><span><b></b><small></small></span>';
     button.querySelector('kbd').textContent=index+1;
-    button.querySelector('b').textContent=c.name+(kind==='draft'&&c.id!=='heal'&&count(balls[0],c.id)?' · 升至第 '+(count(balls[0],c.id)+1)+' 層':'');
-    button.querySelector('small').textContent=c.id==='boost'?boostText[balls[0].type.id]:c.desc;
+    button.querySelector('b').textContent=c.name;
+    button.querySelector('small').textContent=c.desc;
     button.onclick=()=>chooseCard(index);$('offers').append(button);
   });
   $('draft').hidden=false;$('reset').disabled=true;$('back').disabled=true;$('sound').disabled=true;cv.inert=true;
   $('offers').firstElementChild.focus();
-}
-function offerDraft(){
-  const b=balls[0];b.pending=false;b.drafts++;
-  openDraft('draft',pickOptions(),'當層升級','三選一，效果只在本層有效。','暫時能力 · 第 '+b.drafts+' 次');
-  $('hint').textContent='對戰已暫停 · 選一張能力卡';
 }
 function offerReward(){
   const gearId=gearOrder[(run.floor-1)%gearOrder.length];
@@ -343,7 +317,7 @@ function offerReward(){
     {id:'gear',gearId,name:'裝備 · '+equipment.name,desc:special?equipment.desc:'往後每層開場自帶此裝備 1 層。'+equipment.desc},
     {id:'repair',heal,name:'修復包',desc:'一次性回復最大血量的 30%。'+(heal?'這次回復 '+heal+' HP。':'目前血量已滿。')}
   ].map(choice=>({...choice,carryHp}));
-  openDraft('reward',options,'通關獎勵 · 四選一','當層能力會清空，下層帶入 '+carryHp+'/'+max+' HP'+(clearHeal?'（含再生 +'+clearHeal+'）':'')+'。','第 '+run.floor+' 層通關');
+  openDraft(options,'通關獎勵 · 四選一','下層帶入 '+carryHp+'/'+max+' HP'+(clearHeal?'（含再生 +'+clearHeal+'）':'')+'。','第 '+run.floor+' 層通關');
   $('hint').textContent='選擇一項永久強化，或現在補血。';
 }
 $('draft').addEventListener('keydown',e=>{
@@ -364,8 +338,6 @@ function change(b,delta,selfCost=false){
 }
 function burst(b,r){sparks.push({x:b.x,y:b.y,start:t,r,color:b.type.color});}
 function wallHit(b,side,x,y){
-  b.wallHits++;
-  if(b.team===0&&b.wallHits%6===0)b.pending=true;
   if(count(b,'shield')&&!b.shield&&++b.shieldWalls>=5){b.shield=3*count(b,'shield');b.shieldWalls=0;burst(b,24);}
   if(count(b,'mine')&&++b.mineWalls%3===0){
     b.mines.push({x:clamp(x,6,W-6),y:clamp(y,6,W-6),start:t,until:t+5});
@@ -384,7 +356,7 @@ function wallHit(b,side,x,y){
   if(b.type.id!=='laser')return;
   const point={x,y,side};
   if(!b.wall||b.wall.side===side){b.wall=point;return;}
-  if(hypot(b.wall.x-x,b.wall.y-y)>1)beams.push({a:b.wall,b:point,owner:b,until:t+laserLife+.2*count(b,'boost'),touch:new Set()});
+  if(hypot(b.wall.x-x,b.wall.y-y)>1)beams.push({a:b.wall,b:point,owner:b,until:t+laserLife,touch:new Set()});
   b.wall=point;
   const own=beams.filter(l=>l.owner===b);if(own.length>laserCap)beams.splice(beams.indexOf(own[0]),1);
 }
@@ -434,7 +406,7 @@ function contactAttack(s,o,nx,ny){
   if(s.type.id==='dummy'){change(s,-1,true);return false;}
   let damage=s.team===0?1+run.power:s.type.id==='grunt'?1+s.pressure:s.pressure;
   if(s.type.id==='tank'){
-    s.tankHits++;damage+=tankHit+(s.tankHits%3===0?count(s,'boost'):0);change(s,-1,true);
+    damage+=tankHit;change(s,-1,true);
   }
   if(count(s,'spike')&&t>=s.spikeAt){s.spikeAt=t+1;damage+=count(s,'spike');}
   if(count(s,'echo')){
@@ -442,7 +414,7 @@ function contactAttack(s,o,nx,ny){
     if(s.echoes.length>count(s,'echo'))s.echoes.shift();
   }
   if(s.type.id==='charge'&&s.energy===3){
-    s.energy=0;damage+=chargeHit+count(s,'boost');push(o,nx,ny,350);burst(s,40);
+    s.energy=0;damage+=chargeHit;push(o,nx,ny,350);burst(s,40);
   }
   const crit=damage>0&&s.team===0&&Math.random()<Math.min(1,.12+.03*run.power);
   if(crit){
@@ -484,14 +456,14 @@ function update(dt){
     if(t>=grip.end||target.hp<=0){
       const n=vec(target,vamp),nx=n.n?n.x:grip.x,ny=n.n?n.y:grip.y;
       push(target,nx,ny,215);push(vamp,-nx,-ny,215);
-      vamp.ready=t+skillCooldown(vamp,vampCooldown);grip=null;
+      vamp.ready=t+vampCooldown;grip=null;
     }
   }
   for(const s of active){
     if(s.type.id!=='wave'||t<s.ready||s.hp<=0||grip?.target===s)continue;
     const targets=activeOpponents(s).filter(o=>hypot(s.x-o.x,s.y-o.y)<=2*R+17);
     if(!targets.length)continue;
-    s.ready=t+skillCooldown(s,waveCooldown);burst(s,46);
+    s.ready=t+waveCooldown;burst(s,46);
     for(const o of targets){const n=vec(o,s);change(o,-waveHit);push(o,n.n?n.x:1,n.y,290);}
   }
   for(let i=0;i<active.length;i++)for(let j=i+1;j<active.length;j++){
@@ -560,7 +532,6 @@ function update(dt){
   if(player.hp<=0)finish(false);
   else if(balls.slice(1).every(s=>s.hp<=0))finish(true);
   else if(t>=TIME)finish(false);
-  else if(player.pending)offerDraft();
 }
 function frame(now){
   if(state!=='run')return;
