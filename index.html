@@ -14,33 +14,35 @@
 
 .progress{font:700 10px monospace;color:var(--muted);margin-top:5px;letter-spacing:.08em}.progress.ready{color:var(--accent)}.loadouts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;font-size:11px;color:var(--muted);line-height:1.5}.loadouts span:last-child{text-align:right}
 .draft{position:absolute;inset:2px;z-index:2;display:grid;align-items:center;overflow:auto;background:#08090dec;padding:12px}.draft h2{margin:3px 0 5px;font-size:clamp(19px,4vw,31px);color:var(--accent)}.draft p{margin:0 0 9px;color:var(--muted);font-size:12px}.offers{display:grid;gap:5px}.offer{display:grid;grid-template-columns:26px 1fr;gap:6px;text-align:left;align-items:center;border:1px solid #545563;background:#181920;color:#fff;padding:5px 8px;min-height:46px}.offer:hover,.offer:focus-visible{border-color:var(--accent);background:#262b16}.offer kbd{font:bold 13px monospace;color:var(--accent);text-align:center}.offer b{display:block;font-size:14px}.offer small{display:block;color:#c4c4cf;font-size:11px;line-height:1.35}
+.tower-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.tower-head .eyebrow{margin:0}.tower-head .hint{font-size:12px;text-align:right}.loadouts{grid-template-columns:1fr}.loadouts span:last-child{text-align:left}.controls{flex-wrap:wrap}.result>div{padding:12px}.play{max-width:500px}
 </style>
 </head>
 <body>
 <main>
 <section id="home" class="screen home"><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.2.1</p>
+<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.3 · TOWER RUN</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
-<p class="intro">選一顆球迎戰電腦。發射後，兩顆球會自動彈跳並發動技能。</p>
+<p class="intro">選一顆球開始爬塔。撞牆升級只留在當層，通關獎勵則會帶到後面每一層。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
-<div class="choose-footer"><label>電腦對手 <select id="rival"><option value="random">隨機抽選</option></select></label><button class="primary" id="enter" aria-label="進入競技場" disabled><span data-pixel="進入競技場"></span></button></div>
+<div class="choose-footer"><span class="hint">TOWER MODE · 從第 1 層開始</span><button class="primary" id="enter" aria-label="開始爬塔" disabled>開始爬塔</button></div>
 </section>
 <section id="play" class="screen play" hidden>
+<div class="tower-head"><div id="floorLabel" class="eyebrow"></div><div id="floorEnemy" class="hint"></div></div>
 <div class="hud">
 <div class="fighter" id="fighter0"><small>1P</small> <span id="name0"></span> <span id="hp0" class="hptext"></span><div class="track"><i></i></div><div id="walls0" class="progress"></div></div>
 <div class="timer" id="timer">75</div>
-<div class="fighter" id="fighter1"><small>CPU</small> <span id="name1"></span> <span id="hp1" class="hptext"></span><div class="track"><i></i></div><div id="walls1" class="progress"></div></div>
+<div class="fighter" id="fighter1"><small>敵方</small> <span id="name1"></span> <span id="hp1" class="hptext"></span><div class="track"><i></i></div><div id="walls1" class="progress"></div></div>
 </div>
 <div class="field">
-<canvas id="arena" class="arena" width="300" height="300" tabindex="0" aria-label="競技場。按住框內選定起點，向發射方向的反方向拖曳後放開。鍵盤可用方向鍵選發射方向、加減鍵調力道、空白鍵發射。"></canvas>
+<canvas id="arena" class="arena" width="240" height="240" tabindex="0" aria-label="競技場。按住框內選定起點，向發射方向的反方向拖曳後放開。鍵盤可用方向鍵選發射方向、加減鍵調力道、空白鍵發射。"></canvas>
 <div id="draft" class="draft" role="dialog" aria-modal="true" aria-labelledby="draftTitle" hidden><div>
-<div class="eyebrow" id="draftRound"></div><h2 id="draftTitle">選擇能力</h2><p>對戰已暫停，選一張卡後繼續。</p><div class="offers" id="offers"></div>
+<div class="eyebrow" id="draftRound"></div><h2 id="draftTitle">選擇能力</h2><p id="draftInfo"></p><div class="offers" id="offers"></div>
 </div></div>
-<div class="result" id="result" hidden><div><h2 id="outcome"></h2><p id="reason"></p><button id="again" class="primary"><span data-pixel="再戰一場"></span></button></div></div>
+<div class="result" id="result" hidden><div><h2 id="outcome"></h2><p id="reason"></p><button id="again" class="primary">從第 1 層重來</button></div></div>
 </div>
 <div class="loadouts"><span id="loadout0"></span><span id="loadout1"></span></div>
-<div class="controls"><span id="hint" class="hint" aria-live="polite"></span><div><button id="sound" class="secondary" type="button" aria-label="碰撞音效" aria-pressed="true">音效開</button><button id="reset" class="secondary">重開</button><button id="back" class="secondary">換球</button></div></div>
+<div class="controls"><span id="hint" class="hint" aria-live="polite"></span><div><button id="sound" class="secondary" type="button" aria-label="碰撞音效" aria-pressed="true">音效開</button><button id="reset" class="secondary">重打本層</button><button id="back" class="secondary">換球</button></div></div>
 </section>
 </main>
 <script>
@@ -66,27 +68,27 @@ const types=[
   {id:'charge',name:'蓄力球',color:'#ffb454',hp:30,desc:'每撞牆一次蓄一格，滿 3 格後下一撞扣對手 4 點並擊退。'},
   {id:'wave',name:'震波球',color:'#54defa',hp:30,desc:'對手靠近就發出震波，扣 2 點並推開。冷卻 2.5 秒。'}
 ];
-let selection=null, matchRival=null;
+let selection=null;
 for (const [i,t] of types.entries()){
   const b=document.createElement('button');b.className='card';b.style.setProperty('--ball',t.color);
   b.setAttribute('aria-pressed','false');b.innerHTML='<span class="card-top"><i class="orb" aria-hidden="true"></i><b></b></span><small></small><span class="counter"></span>';
   pixel(b.querySelector('b'),t.name);b.querySelector('small').textContent=t.desc;b.querySelector('.counter').textContent='0'+(i+1)+' / '+t.hp+' HP';
   b.onclick=()=>{selection=t;for(const c of $('roster').children)c.setAttribute('aria-pressed',String(c===b));$('enter').disabled=false;};
-  $('roster').append(b);$('rival').add(new Option(t.name,t.id));
+  $('roster').append(b);
 }
 let screen='home';
 function show(next){if(next!==screen&&screen==='play'){stop();drag=null;} for(const name of ['home','select','play'])$(name).hidden=name!==next;screen=next;}
 $('start').onclick=()=>{unlockSound();show('select');$('roster').firstElementChild.focus();};
-$('enter').onclick=()=>{if(!selection)return;const pool=types.filter(t=>t!==selection);
-  matchRival=types.find(t=>t.id===$('rival').value)||pool[Math.floor(Math.random()*pool.length)];show('play');reset();};
+$('enter').onclick=()=>{if(!selection)return;show('play');beginRun();};
 $('back').onclick=()=>{show('select');$('roster').querySelector('[aria-pressed=true]').focus();};
-$('again').onclick=$('reset').onclick=()=>reset();
+$('again').onclick=()=>beginRun();
+$('reset').onclick=()=>reset();
 
-const W=300,R=13,TIME=75, STEP=1/180, cv=$('arena'), ctx=cv.getContext('2d');
+const W=240,R=13,TIME=75, STEP=1/240, cv=$('arena'), ctx=cv.getContext('2d');
 const hypot=Math.hypot, clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const reducedMotion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
 let audio=null,soundOn=true,shake=null,lastHaptic=-Infinity;
-const lastTone={wall:-Infinity,body:-Infinity};
+const lastTone={wall:-Infinity,body:-Infinity,crit:-Infinity};
 try{soundOn=globalThis.localStorage?.getItem('bounce-arena-sound')!=='off';}catch{}
 function updateSoundButton(){
   $('sound').setAttribute('aria-pressed',String(soundOn));
@@ -108,59 +110,103 @@ function unlockSound(){
   }catch{}
 }
 function impact(kind,dx,dy,power,own=true){
-  const body=kind==='body', strength=clamp(power/(body?580:380),.2,1);
+  const crit=kind==='crit',body=kind!=='wall', strength=clamp(power/(body?580:380),.2,1);
   if(!reducedMotion?.matches){
     // Keep a body hit's stronger shake if a ball bounces off a wall immediately afterwards.
-    if(!shake||shake.playState!=='running'||body){
+    if(!shake||shake.playState!=='running'||crit||(body&&shake.impact!=='crit')){
       shake?.cancel();
-      const pixels=(body?2.8:1.2)+(body?3.8:1.4)*strength, x=dx*pixels,y=dy*pixels;
+      const pixels=crit?11:(body?2.8:1.2)+(body?3.8:1.4)*strength, x=dx*pixels,y=dy*pixels;
       shake=cv.animate?.([
         {transform:'none'},
         {transform:'translate('+x+'px,'+y+'px)',offset:.19},
         {transform:'translate('+(-x*.48)+'px,'+(-y*.48)+'px)',offset:.46},
         {transform:'translate('+(x*.23)+'px,'+(y*.23)+'px)',offset:.72},
         {transform:'none'}
-      ],{duration:body?185:105});
+      ],{duration:crit?270:body?185:105});
+      if(shake)shake.impact=kind;
     }
     const now=performance.now();
-    if((body||own)&&now-lastHaptic>=100&&globalThis.navigator?.vibrate){
+    if((body||own)&&(crit||now-lastHaptic>=100)&&globalThis.navigator?.vibrate){
       lastHaptic=now;
-      try{globalThis.navigator.vibrate(body?25:9);}catch{}
+      try{globalThis.navigator.vibrate(crit?55:body?25:9);}catch{}
     }
   }
   if(!soundOn||audio?.state!=='running')return;
   const now=audio.currentTime;
   if(now-lastTone[kind]<(body?.045:.06))return;
   lastTone[kind]=now;
-  const osc=audio.createOscillator(),volume=audio.createGain(),length=body?.115:.064;
-  osc.type=body?'triangle':'sine';
-  osc.frequency.setValueAtTime((body?192:530)+strength*(body?82:150),now);
+  const osc=audio.createOscillator(),volume=audio.createGain(),length=crit?.175:body?.115:.064;
+  osc.type=crit?'square':body?'triangle':'sine';
+  osc.frequency.setValueAtTime((crit?370:body?192:530)+strength*(body?82:150),now);
   osc.frequency.exponentialRampToValueAtTime(body?76:230,now+length);
   volume.gain.setValueAtTime(.0001,now);
-  volume.gain.exponentialRampToValueAtTime((body?.18:own?.085:.055)*(.65+.35*strength),now+.007);
+  volume.gain.exponentialRampToValueAtTime((crit?.13:body?.18:own?.085:.055)*(.65+.35*strength),now+.007);
   volume.gain.exponentialRampToValueAtTime(.0001,now+length);
   osc.connect(volume);volume.connect(audio.destination);osc.start(now);osc.stop(now+length+.01);
   osc.onended=()=>{osc.disconnect();volume.disconnect();};
 }
-let balls=[], beams=[], sparks=[], floats=[], shots=[], draftOptions=[], grip=null, t=0, contact=false, drag=null, state='idle', raf=0,last=0,acc=0,keyAim=null;
-function make(type,x,y){return {type,x,y,vx:0,vy:0,hp:type.hp,maxHp:type.hp,up:{},wallHits:0,drafts:0,pending:false,shield:0,shieldWalls:0,spikeAt:0,mineWalls:0,bladeWalls:0,mines:[],echoes:[],satellites:[],tankHits:0,ready:0,energy:0,laserReady:0,wall:null,trail:[],flash:0};}
+let balls=[], beams=[], sparks=[], floats=[], shots=[], particles=[], draftOptions=[], grip=null, contacts=new Set(), t=0, drag=null, state='idle', raf=0,last=0,acc=0,keyAim=null;
+const floors=[
+  ['訓練層',[['dummy',8]]],
+  ['基礎層',[['grunt',12]]],
+  ['鋼鐵層',[['tank',20]]],
+  ['雷射層',[['laser',22]]],
+  ['雙球層',[['grunt',17],['charge',17]]],
+  ['吸血層',[['vamp',34]]],
+  ['震波層',[['wave',27],['grunt',19]]],
+  ['混戰層',[['tank',24],['laser',23],['grunt',18]]],
+  ['精銳層',[['vamp',29],['charge',29],['wave',29]]],
+  ['塔頂守衛',[['charge',46],['laser',39],['tank',45]]]
+];
+const enemies={
+  ...Object.fromEntries(types.map(type=>[type.id,type])),
+  dummy:{id:'dummy',name:'訓練球',color:'#dedee7'},
+  grunt:{id:'grunt',name:'撞擊球',color:'#ff966b'}
+};
+let run={floor:1,power:0,speed:0,gear:0};
+const gearOrder=['satellite','shield','blade','mine','spike','armor','echo'];
+function beginRun(){run={floor:1,power:0,speed:0,gear:0};reset();}
+function floorSpec(n){
+  if(n<=floors.length)return floors[n-1];
+  const roster=floors[7+(n-11)%3][1];
+  return ['無盡層',roster.map(([id,hp])=>[id,hp+3*(n-10)])];
+}
+function make(type,x,y,team=0,id=0){
+  return {id,team,type,x,y,pressure:0,vx:0,vy:0,hp:type.hp,maxHp:type.hp,up:{},wallHits:0,drafts:0,pending:false,shield:0,shieldWalls:0,spikeAt:0,mineWalls:0,bladeWalls:0,mines:[],echoes:[],satellites:[],tankHits:0,ready:0,energy:0,laserReady:new Map(),wall:null,trail:[],flash:0};
+}
 function reset(){
-  shake?.cancel();shake=null;stop();balls=[make(selection,W*.30,W/2),make(matchRival,W*.75,W/2)];beams=[];sparks=[];floats=[];shots=[];draftOptions=[];closeDraft();grip=null;t=0;contact=false;drag=null;keyAim=null;state='idle';$('result').hidden=true;
-  for(const [i,b] of balls.entries()){pixel($('name'+i),b.type.name);$('fighter'+i).style.setProperty('--ball',b.type.color);}
-  $('hint').textContent='按住框內起點，向後拉，放開發射。';hud();render();cv.focus({preventScroll:true});
+  shake?.cancel();shake=null;stop();closeDraft();
+  const [label,list]=floorSpec(run.floor);
+  balls=[make(selection,W*.25,W/2)];
+  list.forEach(([id,hp],i)=>balls.push(make({...enemies[id],hp},W*.76,W*(i+1)/(list.length+1),1,i+1)));
+  for(const enemy of balls.slice(1))enemy.pressure=run.floor>=5?Math.floor((run.floor-2)/3):0;
+  beams=[];sparks=[];floats=[];shots=[];particles=[];draftOptions=[];contacts=new Set();grip=null;t=0;drag=null;keyAim=null;state='idle';
+  for(let i=0;i<run.gear;i++)grant(balls[0],cards.find(c=>c.id===gearOrder[i%gearOrder.length]));
+  floats=[];
+  pixel($('name0'),selection.name);$('fighter0').style.setProperty('--ball',selection.color);
+  $('fighter1').style.setProperty('--ball',enemies[list[0][0]].color);
+  $('floorLabel').textContent='第 '+run.floor+' 層 · '+label;
+  $('floorEnemy').textContent=list.map(([id])=>enemies[id].name).join(' ＋ ');
+  $('result').hidden=true;
+  $('hint').textContent='按住框內起點，向後拉，放開發射。';
+  hud();render();cv.focus({preventScroll:true});
 }
 function stop(){cancelAnimationFrame(raf);raf=0;}
 function hud(){
+  const b=balls[0],others=balls.slice(1),alive=others.filter(o=>o.hp>0);
   $('timer').textContent=String(Math.max(0,Math.ceil(TIME-t))).padStart(2,'0');
-  for(const [i,b] of balls.entries()){
-    $('hp'+i).textContent=b.hp+'/'+b.maxHp;
-    $('fighter'+i).querySelector('.track i').style.width=100*b.hp/b.maxHp+'%';
-    $('walls'+i).textContent='撞牆 '+(b.wallHits%6)+'/6 · 已升級 '+b.drafts+' 次';
-    $('walls'+i).classList.toggle('ready',b.wallHits%6>=4);
-    const owned=cards.filter(c=>c.id!=='heal'&&b.up[c.id]).map(c=>c.name+(b.up[c.id]>1?' ×'+b.up[c.id]:''));
-    $('loadout'+i).textContent=owned.length?(i===0?'你 · ':'電腦 · ')+owned.join('／'):'';
-
-  }
+  $('hp0').textContent=b.hp+'/'+b.maxHp;
+  $('fighter0').querySelector('.track i').style.width=100*b.hp/b.maxHp+'%';
+  const hp=others.reduce((n,o)=>n+o.hp,0),max=others.reduce((n,o)=>n+o.maxHp,0);
+  $('name1').textContent='剩 '+alive.length+' 顆';
+  $('hp1').textContent=hp+'/'+max;
+  $('fighter1').querySelector('.track i').style.width=100*hp/max+'%';
+  $('walls0').textContent='撞牆 '+(b.wallHits%6)+'/6 · 本層 '+b.drafts+' 次';
+  $('walls0').classList.toggle('ready',b.wallHits%6>=4);
+  $('walls1').textContent=alive.map(o=>o.hp+' HP').join(' · ');
+  $('loadout0').textContent='永久 · 力量 '+run.power+' ／ 速度 '+run.speed+' ／ 裝備 '+run.gear;
+  const owned=cards.filter(c=>c.id!=='heal'&&count(b,c.id)).map(c=>c.name+(count(b,c.id)>1?' ×'+count(b,c.id):''));
+  $('loadout1').textContent=owned.length?'目前能力（含起始裝備） · '+owned.join('／'):'';
 }
 function point(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left-cv.clientLeft)*W/cv.clientWidth,y:(e.clientY-r.top-cv.clientTop)*W/cv.clientHeight};}
 function legal(p){return{x:clamp(p.x,R+1,W-R-1),y:clamp(p.y,R+1,W-R-1)};}
@@ -168,13 +214,17 @@ function vec(a,b){const x=a.x-b.x,y=a.y-b.y,n=hypot(x,y);return{x:n?x/n:0,y:n?y/
 function pullVector(d,end){const v=vec(d.raw,end);v.n*=400/W;return v;}
 function launch(p,v){
   if(state!=='idle'||v.n<5)return;
-  unlockSound();drag=null;keyAim=null;state='run';const speed=clamp(125+v.n*2.15,140,390);
+  unlockSound();drag=null;keyAim=null;state='run';
+  const speed=clamp(125+v.n*2.15,140,390)*1.10*speedScale(balls[0]);
   Object.assign(balls[0],{x:p.x,y:p.y,vx:v.x*speed,vy:v.y*speed});
-  const right=p.x<W/2;
-  const cpu={x:right?W*.75:W*.25,y:clamp(p.y+(p.y>W/2?-48:48),R+1,W-R-1)};
-  const d=vec(p,cpu),a=Math.atan2(d.y,d.x)+(Math.random()-.5)*.36;
-  Object.assign(balls[1],{...cpu,vx:Math.cos(a)*235,vy:Math.sin(a)*235});
-  $('hint').textContent='對戰中 · 每撞牆 6 次可抽卡';
+  const side=p.x<W/2?W*.77:W*.23;
+  balls.slice(1).forEach((b,i)=>{
+    b.x=side;b.y=W*(i+1)/balls.length;
+    const d=vec(p,b),a=Math.atan2(d.y,d.x)+(Math.random()-.5)*.36;
+    const v=b.type.id==='dummy'?195:258+Math.min(40,(run.floor-1)*2.5);
+    b.vx=Math.cos(a)*v;b.vy=Math.sin(a)*v;
+  });
+  $('hint').textContent='對戰中 · 每撞牆 6 次可選本層能力';
   last=0;acc=0;raf=requestAnimationFrame(frame);
 }
 cv.addEventListener('pointerdown',e=>{
@@ -212,7 +262,7 @@ const cards=[
 ];
 const boostText={tank:'每第 3 次撞到對手，每層額外扣對手 1 點。',vamp:'每層讓吸附冷卻縮至原本的 85%。',laser:'每層讓雷射多維持 0.2 秒。',charge:'每層讓蓄滿後的重撞額外扣對手 1 點。',wave:'每層讓震波冷卻縮至原本的 85%。'};
 const count=(b,id)=>b.up[id]||0;
-const speedScale=b=>1+.08*count(b,'speed');
+const speedScale=b=>1+.08*count(b,'speed')+(b.team===0?.08*run.speed:0);
 const skillCooldown=(b,base)=>base*.85**count(b,'boost');
 function pickOptions(){
   const pool=[...cards];
@@ -228,40 +278,46 @@ function grant(b,c){
   if(c.id==='satellite')b.satellites.push({ready:0});
   if(c.id==='speed'){const scale=speedScale(b)/(speedScale(b)-.08);if(b.cruise)b.cruise*=scale;else{b.vx*=scale;b.vy*=scale;}}
 }
-function cpuPick(b,offer){
-  const score={heal:b.hp/b.maxHp<.45?8:b.hp/b.maxHp<.78?4:0,armor:4,speed:3,shield:4,boost:3,spike:2,satellite:4,mine:3,echo:2,blade:3};
-  return offer.map(c=>({c,value:score[c.id]+Math.random()*2})).sort((a,b)=>b.value-a.value)[0].c;
-}
 function closeDraft(){
   $('draft').hidden=true;$('offers').replaceChildren();$('reset').disabled=false;$('back').disabled=false;$('sound').disabled=false;cv.inert=false;
 }
 function chooseCard(i){
-  if(state!=='draft'||!draftOptions[i])return;
-  grant(balls[0],draftOptions[i]);draftOptions=[];closeDraft();
-  state='run';$('hint').textContent='對戰中 · 每撞牆 6 次可抽卡';hud();render();
+  if(!['draft','reward'].includes(state)||!draftOptions[i])return;
+  const choice=draftOptions[i],reward=state==='reward';
+  draftOptions=[];closeDraft();
+  if(reward){run[choice.id]++;run.floor++;reset();return;}
+  grant(balls[0],choice);state='run';
+  $('hint').textContent='對戰中 · 每撞牆 6 次可選本層能力';hud();render();
   cv.focus({preventScroll:true});last=0;acc=0;raf=requestAnimationFrame(frame);
 }
-function offerDrafts(){
-  for(const [i,b] of balls.entries()){
-    if(!b.pending)continue;
-    b.pending=false;b.drafts++;
-    const offer=pickOptions();
-    if(i===1){grant(b,cpuPick(b,offer));continue;}
-    state='draft';stop();draftOptions=offer;
-    $('draftRound').textContent='第 '+b.drafts+' 次升級';
-    $('offers').replaceChildren();
-    offer.forEach((c,index)=>{
-      const button=document.createElement('button');button.className='offer';
-      button.innerHTML='<kbd></kbd><span><b></b><small></small></span>';
-      button.querySelector('kbd').textContent=index+1;
-      button.querySelector('b').textContent=c.name+(c.id!=='heal'&&count(b,c.id)?' · 升至第 '+(count(b,c.id)+1)+' 層':'');
-      button.querySelector('small').textContent=c.id==='boost'?boostText[b.type.id]:c.desc;
-      button.onclick=()=>chooseCard(index);$('offers').append(button);
-    });
-    $('draft').hidden=false;$('reset').disabled=true;$('back').disabled=true;$('sound').disabled=true;cv.inert=true;
-    $('hint').textContent='對戰已暫停 · 選一張能力卡';
-    $('offers').firstElementChild.focus();
-  }
+function openDraft(kind,options,title,info,round){
+  state=kind;stop();draftOptions=options;
+  $('draftTitle').textContent=title;$('draftInfo').textContent=info;$('draftRound').textContent=round;
+  $('offers').replaceChildren();
+  options.forEach((c,index)=>{
+    const button=document.createElement('button');button.className='offer';
+    button.innerHTML='<kbd></kbd><span><b></b><small></small></span>';
+    button.querySelector('kbd').textContent=index+1;
+    button.querySelector('b').textContent=c.name+(kind==='draft'&&c.id!=='heal'&&count(balls[0],c.id)?' · 升至第 '+(count(balls[0],c.id)+1)+' 層':'');
+    button.querySelector('small').textContent=c.id==='boost'?boostText[balls[0].type.id]:c.desc;
+    button.onclick=()=>chooseCard(index);$('offers').append(button);
+  });
+  $('draft').hidden=false;$('reset').disabled=true;$('back').disabled=true;$('sound').disabled=true;cv.inert=true;
+  $('offers').firstElementChild.focus();
+}
+function offerDraft(){
+  const b=balls[0];b.pending=false;b.drafts++;
+  openDraft('draft',pickOptions(),'當層升級','三選一，效果只在本層有效。','暫時能力 · 第 '+b.drafts+' 次');
+  $('hint').textContent='對戰已暫停 · 選一張能力卡';
+}
+function offerReward(){
+  const equipment=cards.find(c=>c.id===gearOrder[run.gear%gearOrder.length]);
+  openDraft('reward',[
+    {id:'power',name:'力量',desc:'往後每層，本體碰撞傷害 +1，爆擊率 +3 個百分點（最高 100%）。'},
+    {id:'speed',name:'速度',desc:'往後每層，基準球速 +8%。'},
+    {id:'gear',name:'裝備',desc:'往後每層開場自帶「'+equipment.name+'」1 層。'}
+  ],'選擇永久升級','本層能力會清空，下一層回滿血並重新發射。','第 '+run.floor+' 層通關');
+  $('hint').textContent='選擇一項升級，帶往後續樓層。';
 }
 $('draft').addEventListener('keydown',e=>{
   if(/^[1-3]$/.test(e.key)){e.preventDefault();chooseCard(Number(e.key)-1);}
@@ -282,7 +338,7 @@ function change(b,delta,selfCost=false){
 function burst(b,r){sparks.push({x:b.x,y:b.y,start:t,r,color:b.type.color});}
 function wallHit(b,side,x,y){
   b.wallHits++;
-  if(b.wallHits%6===0)b.pending=true;
+  if(b.team===0&&b.wallHits%6===0)b.pending=true;
   if(count(b,'shield')&&!b.shield&&++b.shieldWalls>=5){b.shield=3*count(b,'shield');b.shieldWalls=0;burst(b,24);}
   if(count(b,'mine')&&++b.mineWalls%3===0){
     b.mines.push({x:clamp(x,6,W-6),y:clamp(y,6,W-6),start:t,until:t+5});
@@ -318,7 +374,7 @@ function move(b,dt,skills=true){
   }
 }
 function push(b,x,y,speed){
-  if(count(b,'speed')){
+  if(speedScale(b)>1){
     b.cruise=b.cruise||hypot(b.vx,b.vy)||120*speedScale(b);
     b.knockEnd=t+.25;
   }
@@ -334,97 +390,141 @@ function distLine(p,l){const dx=l.b.x-l.a.x,dy=l.b.y-l.a.y;
   const k=clamp(((p.x-l.a.x)*dx+(p.y-l.a.y)*dy)/(dx*dx+dy*dy),0,1);
   return hypot(p.x-l.a.x-k*dx,p.y-l.a.y-k*dy);
 }
-function finish(){
-  state='end';stop();const [a,b]=balls,timeout=a.hp>0&&b.hp>0;
-  const margin=timeout?a.hp*b.maxHp-b.hp*a.maxHp:a.hp-b.hp;
-  pixel($('outcome'),margin===0?'平手':margin>0?'你贏了':'電腦獲勝');
-  $('reason').textContent=timeout?'時間到，依剩餘血量比例判定。':margin===0?'雙方同時耗盡血量。':'其中一方血量歸零。';
-  $('hint').textContent='對戰結束';$('result').hidden=false;$('again').focus();
+function finish(won){
+  if(won){offerReward();return;}
+  state='end';stop();
+  $('outcome').textContent='止步第 '+run.floor+' 層';
+  $('reason').textContent=balls[0].hp<=0?'血量歸零。本次爬塔結束。':'時間到，敵人還沒清完。';
+  $('hint').textContent='已通過 '+(run.floor-1)+' 層 · 本次升級已結算';$('result').hidden=false;$('again').focus();
 }
+function hitBurst(x,y){
+  for(let i=0;i<26;i++){
+    const a=i*Math.PI*2/26+Math.sin(i*21)*.17,v=45+(i%7)*18;
+    particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,start:t,color:i%3===0?'#fff':i%3===1?'#ffe168':'#ff923f',size:2+i%3});
+  }
+}
+function contactAttack(s,o,nx,ny){
+  if(s.type.id==='dummy'){change(s,-1,true);return false;}
+  let damage=s.team===0?1+run.power:s.type.id==='grunt'?1+s.pressure:s.pressure;
+  if(s.type.id==='tank'){
+    s.tankHits++;damage+=tankHit+(s.tankHits%3===0?count(s,'boost'):0);change(s,-1,true);
+  }
+  if(count(s,'spike')&&t>=s.spikeAt){s.spikeAt=t+1;damage+=count(s,'spike');}
+  if(count(s,'echo')){
+    s.echoes.push({x:s.x,y:s.y,start:t+1,until:t+3});
+    if(s.echoes.length>count(s,'echo'))s.echoes.shift();
+  }
+  if(s.type.id==='charge'&&s.energy===3){
+    s.energy=0;damage+=chargeHit+count(s,'boost');push(o,nx,ny,350);burst(s,40);
+  }
+  const crit=damage>0&&s.team===0&&Math.random()<Math.min(1,.12+.03*run.power);
+  if(crit){
+    damage*=2;
+    const x=(s.x+o.x)/2,y=(s.y+o.y)/2;
+    hitBurst(x,y);floats.push({x,y:y-7,start:t,label:'爆擊！',color:'#ffe168',crit:true});
+  }
+  if(damage)change(o,-damage);
+  return crit;
+}
+function activeOpponents(s){return balls.filter(o=>o.hp>0&&o.team!==s.team);}
 function update(dt){
   t+=dt;
-  const [a,b]=balls;
+  const player=balls[0],active=balls.filter(s=>s.hp>0);
+  if(grip&&(grip.vamp.hp<=0||grip.target.hp<=0))grip=null;
+  for(const s of active){
+    if(grip?.target===s)continue;
+    returnToCruise(s);move(s,dt);
+  }
   if(grip){
     const {vamp,target}=grip;
-    move(vamp,dt);
-    let x=clamp(vamp.x+grip.x*(2*R-1),R,W-R),y=clamp(vamp.y+grip.y*(2*R-1),R,W-R);
-    if(hypot(x-vamp.x,y-vamp.y)<R){grip.x*=-1;grip.y*=-1;x=clamp(vamp.x+grip.x*(2*R-1),R,W-R);y=clamp(vamp.y+grip.y*(2*R-1),R,W-R);}
-    target.x=x;target.y=y;
-    while(grip.ticks<vampTicks&&t>=grip.next){if(target.hp>0){const drained=-change(target,-1);if(drained)change(vamp,drained);}grip.next+=.4;grip.ticks++;}
-    if(t>=grip.end){
+    const tx=clamp(vamp.x+grip.x*(2*R-1),R,W-R),ty=clamp(vamp.y+grip.y*(2*R-1),R,W-R);
+    if(hypot(tx-vamp.x,ty-vamp.y)<R){grip.x*=-1;grip.y*=-1;}
+    target.x=clamp(vamp.x+grip.x*(2*R-1),R,W-R);
+    target.y=clamp(vamp.y+grip.y*(2*R-1),R,W-R);
+    while(grip.ticks<vampTicks&&t>=grip.next){
+      if(target.hp>0){const drained=-change(target,-1);if(drained)change(vamp,drained);}
+      grip.next+=.4;grip.ticks++;
+    }
+    if(t>=grip.end||target.hp<=0){
       const n=vec(target,vamp),nx=n.n?n.x:grip.x,ny=n.n?n.y:grip.y;
       push(target,nx,ny,215);push(vamp,-nx,-ny,215);
-      vamp.ready=t+skillCooldown(vamp,vampCooldown);grip=null;contact=true;
+      vamp.ready=t+skillCooldown(vamp,vampCooldown);grip=null;
     }
-  }else{
-    for(const ball of balls){returnToCruise(ball);move(ball,dt);}
+  }
+  for(const s of active){
+    if(s.type.id!=='wave'||t<s.ready||s.hp<=0||grip?.target===s)continue;
+    const targets=activeOpponents(s).filter(o=>hypot(s.x-o.x,s.y-o.y)<=2*R+17);
+    if(!targets.length)continue;
+    s.ready=t+skillCooldown(s,waveCooldown);burst(s,46);
+    for(const o of targets){const n=vec(o,s);change(o,-waveHit);push(o,n.n?n.x:1,n.y,290);}
+  }
+  for(let i=0;i<active.length;i++)for(let j=i+1;j<active.length;j++){
+    const a=active[i],b=active[j],key=a.id+':'+b.id;
+    if(a.hp<=0||b.hp<=0)continue;
     const n=vec(b,a),nx=n.n?n.x:1,ny=n.y;
-    for(const [w,o,sgn] of [[a,b,1],[b,a,-1]]){
-      if(w.type.id==='wave'&&n.n<=2*R+17&&t>=w.ready){
-        w.ready=t+skillCooldown(w,waveCooldown);change(o,-waveHit);push(o,sgn*nx,sgn*ny,290);burst(w,46);
-      }
+    if(n.n>2*R){if(n.n>2*R+1)contacts.delete(key);continue;}
+    if(grip&&(grip.target===a||grip.target===b)){
+      if((grip.vamp===a&&grip.target===b)||(grip.vamp===b&&grip.target===a))contacts.add(key);
+      continue;
     }
-    if(n.n<=2*R){
-      const closing=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny;
-      const correction=(2*R-n.n+.2)/2;
-      a.x=clamp(a.x-correction*nx,R,W-R);a.y=clamp(a.y-correction*ny,R,W-R);
-      b.x=clamp(b.x+correction*nx,R,W-R);b.y=clamp(b.y+correction*ny,R,W-R);
-      if(closing>0){a.vx-=closing*nx;a.vy-=closing*ny;b.vx+=closing*nx;b.vy+=closing*ny;}
-      if(!contact){
-        impact('body',nx,ny,Math.max(0,closing));
-        for(const [s,o,sgn] of [[a,b,1],[b,a,-1]]){
-          if(s.type.id==='tank'){s.tankHits++;change(o,-tankHit-(s.tankHits%3===0?count(s,'boost'):0));change(s,-1,true);}
-          if(count(s,'spike')&&t>=s.spikeAt){s.spikeAt=t+1;change(o,-count(s,'spike'));}
-          if(count(s,'echo')){
-            s.echoes.push({x:s.x,y:s.y,start:t+1,until:t+3});
-            if(s.echoes.length>count(s,'echo'))s.echoes.shift();
-          }
-          if(s.type.id==='charge'&&s.energy===3){s.energy=0;change(o,-chargeHit-count(s,'boost'));push(o,sgn*nx,sgn*ny,350);burst(s,40);}
-        }
-        const readyVamps=balls.filter(s=>s.type.id==='vamp'&&t>=s.ready&&s.hp>0);
-        // Simultaneous grabs cancel so neither slot gets priority.
-        const vamp=readyVamps.length===1?readyVamps[0]:null;
-        if(vamp){const target=vamp===a?b:a,dir=vamp===a?1:-1;
-          if(target.hp>0){grip={vamp,target,x:nx*dir,y:ny*dir,next:t+.4,end:t+.4*vampTicks,ticks:0};}
-        }
-      }
-      contact=true;
-    }else if(n.n>2*R+1)contact=false;
-    for(const ball of balls){
-      const s=hypot(ball.vx,ball.vy);
-      const scale=speedScale(ball);
-      if(s>0&&(s<120*scale||s>400*scale)){const k=clamp(s,120*scale,400*scale)/s;ball.vx*=k;ball.vy*=k;}
-      else if(s===0){ball.vx=ball===a?120:-120;}
+    const closing=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny,correction=(2*R-n.n+.2)/2;
+    a.x=clamp(a.x-correction*nx,R,W-R);a.y=clamp(a.y-correction*ny,R,W-R);
+    b.x=clamp(b.x+correction*nx,R,W-R);b.y=clamp(b.y+correction*ny,R,W-R);
+    if(closing>0){a.vx-=closing*nx;a.vy-=closing*ny;b.vx+=closing*nx;b.vy+=closing*ny;}
+    if(contacts.has(key))continue;
+    contacts.add(key);
+    if(a.team===b.team)continue;
+    // Both sides resolve the collision even if the first hit was lethal.
+    const critA=contactAttack(a,b,nx,ny),critB=contactAttack(b,a,-nx,-ny);
+    impact(critA||critB?'crit':'body',nx,ny,Math.max(0,closing));
+    const vampires=[a,b].filter(s=>s.type.id==='vamp'&&t>=s.ready);
+    if(!grip&&vampires.length===1&&a.hp>0&&b.hp>0){
+      const vamp=vampires[0],target=vamp===a?b:a,dir=vamp===a?1:-1;
+      grip={vamp,target,x:nx*dir,y:ny*dir,next:t+.4,end:t+.4*vampTicks,ticks:0};
     }
   }
-  beams=beams.filter(l=>l.until>t);
-  for(const l of beams)for(const s of balls)if(s!==l.owner){
-    const d=distLine(s,l);if(d<=R&&!l.touch.has(s)){l.touch.add(s);if(t>=s.laserReady){change(s,-laserHit);s.laserReady=t+laserCooldown;}}
-    else if(d>R+2)l.touch.delete(s);
+  for(const s of active){
+    const v=hypot(s.vx,s.vy),scale=speedScale(s),min=132*scale,max=440*scale;
+    if(t<(s.knockEnd||0)&&v>0)continue;
+    if(!v)s.vx=(s.team?-1:1)*min;
+    else if(v<min||v>max){const k=clamp(v,min,max)/v;s.vx*=k;s.vy*=k;}
   }
-  for(const [s,o] of [[a,b],[b,a]]){
+  beams=beams.filter(l=>l.until>t&&l.owner.hp>0);
+  for(const l of beams)for(const s of activeOpponents(l.owner)){
+    const d=distLine(s,l);
+    if(d<=R&&!l.touch.has(s)){
+      l.touch.add(s);
+      if(t>=(s.laserReady.get(l.owner.id)||0)){change(s,-laserHit);s.laserReady.set(l.owner.id,t+laserCooldown);}
+    }else if(d>R+2)l.touch.delete(s);
+  }
+  for(const s of active){
+    if(s.hp<=0)continue;
     for(const [i,satellite] of s.satellites.entries()){
       if(t<satellite.ready)continue;
-      const p=orbit(s,i);
-      if(hypot(p.x-o.x,p.y-o.y)<=R+4){change(o,-1);satellite.ready=t+1.2;}
+      const p=orbit(s,i),o=activeOpponents(s).find(o=>hypot(p.x-o.x,p.y-o.y)<=R+4);
+      if(o){change(o,-1);satellite.ready=t+1.2;}
     }
     for(const key of ['mines','echoes'])if(s[key].length)s[key]=s[key].filter(trap=>{
       if(t>=trap.until)return false;
-      if(t>=trap.start&&hypot(trap.x-o.x,trap.y-o.y)<=R+7){change(o,-2);return false;}
+      const o=t>=trap.start&&activeOpponents(s).find(o=>hypot(trap.x-o.x,trap.y-o.y)<=R+7);
+      if(o){change(o,-2);return false;}
       return true;
     });
   }
   shots=shots.filter(p=>{
     p.x+=p.vx*dt;p.y+=p.vy*dt;
-    if(t>=p.until||p.x<0||p.x>W||p.y<0||p.y>W)return false;
-    const o=p.owner===a?b:a;
-    if(hypot(p.x-o.x,p.y-o.y)<=R+3){change(o,-2);return false;}
+    if(p.owner.hp<=0||t>=p.until||p.x<0||p.x>W||p.y<0||p.y>W)return false;
+    const o=activeOpponents(p.owner).find(o=>hypot(p.x-o.x,p.y-o.y)<=R+3);
+    if(o){change(o,-2);return false;}
     return true;
   });
-  floats=floats.filter(f=>t-f.start<.65);sparks=sparks.filter(f=>t-f.start<.3);
-  if(Math.floor(t*40)!==Math.floor((t-dt)*40))for(const s of balls){s.trail.push([s.x,s.y]);if(s.trail.length>7)s.trail.shift();}
-  if(t>=TIME||balls.some(s=>s.hp<=0))finish();
-  else if(balls.some(s=>s.pending))offerDrafts();
+  floats=floats.filter(f=>t-f.start<(f.crit?.85:.65));sparks=sparks.filter(f=>t-f.start<.3);
+  particles=particles.filter(f=>t-f.start<.48);
+  if(Math.floor(t*40)!==Math.floor((t-dt)*40))for(const s of active){s.trail.push([s.x,s.y]);if(s.trail.length>7)s.trail.shift();}
+  if(player.hp<=0)finish(false);
+  else if(balls.slice(1).every(s=>s.hp<=0))finish(true);
+  else if(t>=TIME)finish(false);
+  else if(player.pending)offerDraft();
 }
 function frame(now){
   if(state!=='run')return;
@@ -467,6 +567,7 @@ function render(){
   }
   ctx.globalAlpha=1;
   if(state==='idle'){
+    for(const enemy of balls.slice(1))sprite(enemy,enemy.x,enemy.y,true);
     const a=drag?.origin||balls[0];sprite(balls[0],a.x,a.y,true);
     const v=drag?pullVector(drag,drag.end):keyAim?{x:Math.cos(keyAim.a),y:Math.sin(keyAim.a),n:keyAim.n}:null;
     if(v&&v.n>=5){
@@ -481,6 +582,7 @@ function render(){
     return;
   }
   for(const s of balls){
+    if(s.hp<=0)continue;
     for(const mine of s.mines){ctx.fillStyle=s.type.color;ctx.fillRect(mine.x-5,mine.y-5,10,10);ctx.fillStyle='#fff';ctx.fillRect(mine.x-1,mine.y-1,2,2);}
     for(const echo of s.echoes){ctx.globalAlpha=t<echo.start?.28:.75;ctx.strokeStyle=s.type.color;ctx.setLineDash([3,2]);ctx.strokeRect(echo.x-8,echo.y-8,16,16);ctx.setLineDash([]);ctx.globalAlpha=1;}
     for(const [i] of s.satellites.entries()){const p=orbit(s,i);line(s.x,s.y,p.x,p.y,s.type.color+'66');ctx.fillStyle=s.type.color;ctx.fillRect(Math.round(p.x)-4,Math.round(p.y)-4,8,8);}
@@ -488,12 +590,23 @@ function render(){
   for(const p of shots){const sp=hypot(p.vx,p.vy);line(p.x-p.vx/sp*8,p.y-p.vy/sp*8,p.x+p.vx/sp*3,p.y+p.vy/sp*3,p.owner.type.color,3);}
   if(grip)line(grip.vamp.x,grip.vamp.y,grip.target.x,grip.target.y,'#ff5778',7);
   for(const s of balls){
+    if(s.hp<=0)continue;
     for(const [i,[x,y]] of s.trail.entries()){
       ctx.globalAlpha=(i+1)*.043;ctx.fillStyle=s.type.color;ctx.fillRect(Math.round(x)-3,Math.round(y)-3,6,6);
     }ctx.globalAlpha=1;sprite(s);
   }
   for(const f of sparks){const u=(t-f.start)/.3,r=10+u*f.r;ctx.globalAlpha=1-u;ctx.strokeStyle=f.color;ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<8;i++){const a=Math.PI/8+i*Math.PI/4,x=f.x+Math.cos(a)*r,y=f.y+Math.sin(a)*r;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();ctx.stroke();}
-  for(const f of floats){const u=(t-f.start)/.65;ctx.globalAlpha=1-u;ctx.fillStyle=f.color;ctx.font='bold 15px monospace';ctx.textAlign='center';ctx.fillText(f.label,clamp(f.x,14,W-14),clamp(f.y-17-u*20,9,W-9));}
+  if(!reducedMotion?.matches)for(const p of particles){
+    const age=t-p.start;ctx.globalAlpha=1-age/.48;ctx.fillStyle=p.color;
+    ctx.fillRect(Math.round(p.x+p.vx*age),Math.round(p.y+p.vy*age+55*age*age),p.size,p.size);
+  }
+  for(const f of floats){
+    const u=(t-f.start)/(f.crit?.85:.65);ctx.globalAlpha=1-u;ctx.fillStyle=f.color;
+    ctx.font=f.crit?'900 20px system-ui':'bold 15px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+    const x=clamp(f.x,f.crit?40:14,W-(f.crit?40:14)),y=clamp(f.y-17-u*20,12,W-9);
+    if(f.crit){ctx.lineWidth=4;ctx.strokeStyle='#3d1e04';ctx.strokeText(f.label,x,y);}
+    ctx.fillText(f.label,x,y);
+  }
   ctx.globalAlpha=1;
 }
 </script>
