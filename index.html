@@ -17,7 +17,7 @@
 <main>
 <section id="home" class="screen home"><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.1</p>
+<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.1.1</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
 <p class="intro">選一顆球迎戰電腦。發射後，兩顆球會自動彈跳並發動技能。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
@@ -51,12 +51,13 @@ function pixel(el, text) {
 }
 document.querySelectorAll('[data-pixel]').forEach(el=>pixel(el,el.dataset.pixel));
 const $=id=>document.getElementById(id);
+const {tankHit,vampTicks,vampCooldown,laserLife,laserHit,laserCooldown,chargeHit,waveHit,waveCooldown,laserCap} = {"tankHit":2,"vampTicks":2,"vampCooldown":5,"laserLife":1.45,"laserHit":2,"laserCooldown":0.7,"chargeHit":4,"waveHit":2,"waveCooldown":2.5,"laserCap":1};
 const types=[
-  {id:'tank',name:'鐵甲球',color:'#dfff69',hp:60,desc:'雙倍血量。撞到對手時，雙方各扣 1 點。'},
-  {id:'vamp',name:'吸血球',color:'#ff5778',hp:30,desc:'碰到對手後黏住 1.2 秒，每 0.4 秒吸取 1 點。'},
-  {id:'laser',name:'雷射球',color:'#c185ff',hp:30,desc:'接連撞到兩面不同的牆，就連起雷射。對手穿過扣 2 點。'},
-  {id:'charge',name:'蓄力球',color:'#ffb454',hp:30,desc:'每撞牆一次蓄一格，滿 3 格後下一撞扣對手 5 點並擊退。'},
-  {id:'wave',name:'震波球',color:'#54defa',hp:30,desc:'對手靠近就發出震波，扣 2 點並推開。冷卻 4 秒。'}
+  {id:'tank',name:'鐵甲球',color:'#dfff69',hp:60,desc:'雙倍血量。撞到對手時，對手扣 2 點，自己扣 1 點。'},
+  {id:'vamp',name:'吸血球',color:'#ff5778',hp:30,desc:'撞到對手後黏住 0.8 秒，每 0.4 秒吸取 1 點。結束後冷卻 5 秒。'},
+  {id:'laser',name:'雷射球',color:'#c185ff',hp:30,desc:'撞過兩面不同的牆就拉出雷射，最多 1 條、維持 1.45 秒。對手穿過扣 2 點，同一目標每 0.7 秒最多受傷一次。'},
+  {id:'charge',name:'蓄力球',color:'#ffb454',hp:30,desc:'每撞牆一次蓄一格，滿 3 格後下一撞扣對手 4 點並擊退。'},
+  {id:'wave',name:'震波球',color:'#54defa',hp:30,desc:'對手靠近就發出震波，扣 2 點並推開。冷卻 2.5 秒。'}
 ];
 let selection=null, matchRival=null;
 for (const [i,t] of types.entries()){
@@ -77,7 +78,7 @@ $('again').onclick=$('reset').onclick=()=>reset();
 const W=300,R=13,TIME=75, STEP=1/180, cv=$('arena'), ctx=cv.getContext('2d');
 const hypot=Math.hypot, clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 let balls=[], beams=[], sparks=[], floats=[], grip=null, t=0, contact=false, drag=null, state='idle', raf=0,last=0,acc=0,keyAim=null;
-function make(type,x,y){return {type,x,y,vx:0,vy:0,hp:type.hp,ready:0,energy:0,wall:null,trail:[],flash:0};}
+function make(type,x,y){return {type,x,y,vx:0,vy:0,hp:type.hp,ready:0,energy:0,laserReady:0,wall:null,trail:[],flash:0};}
 function reset(){
   stop();balls=[make(selection,W*.30,W/2),make(matchRival,W*.75,W/2)];beams=[];sparks=[];floats=[];grip=null;t=0;contact=false;drag=null;keyAim=null;state='idle';$('result').hidden=true;
   for(const [i,b] of balls.entries()){pixel($('name'+i),b.type.name);$('fighter'+i).style.setProperty('--ball',b.type.color);}
@@ -138,9 +139,9 @@ function wallHit(b,side,x,y){
   if(b.type.id!=='laser')return;
   const point={x,y,side};
   if(!b.wall||b.wall.side===side){b.wall=point;return;}
-  if(hypot(b.wall.x-x,b.wall.y-y)>1)beams.push({a:b.wall,b:point,owner:b,until:t+5,touch:new Set()});
+  if(hypot(b.wall.x-x,b.wall.y-y)>1)beams.push({a:b.wall,b:point,owner:b,until:t+laserLife,touch:new Set()});
   b.wall=point;
-  const own=beams.filter(l=>l.owner===b);if(own.length>4)beams.splice(beams.indexOf(own[0]),1);
+  const own=beams.filter(l=>l.owner===b);if(own.length>laserCap)beams.splice(beams.indexOf(own[0]),1);
 }
 function move(b,dt,skills=true){
   b.x+=b.vx*dt;b.y+=b.vy*dt;
@@ -173,18 +174,18 @@ function update(dt){
     let x=clamp(vamp.x+grip.x*(2*R-1),R,W-R),y=clamp(vamp.y+grip.y*(2*R-1),R,W-R);
     if(hypot(x-vamp.x,y-vamp.y)<R){grip.x*=-1;grip.y*=-1;x=clamp(vamp.x+grip.x*(2*R-1),R,W-R);y=clamp(vamp.y+grip.y*(2*R-1),R,W-R);}
     target.x=x;target.y=y;
-    while(grip.ticks<3&&t>=grip.next){if(target.hp>0){change(target,-1);change(vamp,1);}grip.next+=.4;grip.ticks++;}
+    while(grip.ticks<vampTicks&&t>=grip.next){if(target.hp>0){change(target,-1);change(vamp,1);}grip.next+=.4;grip.ticks++;}
     if(t>=grip.end){
       const n=vec(target,vamp),nx=n.n?n.x:grip.x,ny=n.n?n.y:grip.y;
       push(target,nx,ny,215);push(vamp,-nx,-ny,215);
-      vamp.ready=t+1.35;grip=null;contact=true;
+      vamp.ready=t+vampCooldown;grip=null;contact=true;
     }
   }else{
     for(const ball of balls)move(ball,dt);
     const n=vec(b,a),nx=n.n?n.x:1,ny=n.y;
     for(const [w,o,sgn] of [[a,b,1],[b,a,-1]]){
       if(w.type.id==='wave'&&n.n<=2*R+17&&t>=w.ready){
-        w.ready=t+4;change(o,-2);push(o,sgn*nx,sgn*ny,290);burst(w,46);
+        w.ready=t+waveCooldown;change(o,-waveHit);push(o,sgn*nx,sgn*ny,290);burst(w,46);
       }
     }
     if(n.n<=2*R){
@@ -195,12 +196,14 @@ function update(dt){
       if(closing>0){a.vx-=closing*nx;a.vy-=closing*ny;b.vx+=closing*nx;b.vy+=closing*ny;}
       if(!contact){
         for(const [s,o,sgn] of [[a,b,1],[b,a,-1]]){
-          if(s.type.id==='tank'){change(o,-1);change(s,-1);}
-          if(s.type.id==='charge'&&s.energy===3){s.energy=0;change(o,-5);push(o,sgn*nx,sgn*ny,350);burst(s,40);}
+          if(s.type.id==='tank'){change(o,-tankHit);change(s,-1);}
+          if(s.type.id==='charge'&&s.energy===3){s.energy=0;change(o,-chargeHit);push(o,sgn*nx,sgn*ny,350);burst(s,40);}
         }
-        const vamp=balls.find(s=>s.type.id==='vamp'&&t>=s.ready&&s.hp>0);
+        const readyVamps=balls.filter(s=>s.type.id==='vamp'&&t>=s.ready&&s.hp>0);
+        // Simultaneous grabs cancel so neither slot gets priority.
+        const vamp=readyVamps.length===1?readyVamps[0]:null;
         if(vamp){const target=vamp===a?b:a,dir=vamp===a?1:-1;
-          if(target.hp>0){grip={vamp,target,x:nx*dir,y:ny*dir,next:t+.4,end:t+1.2,ticks:0};target.ready=target.type.id==='vamp'?t+2.55:target.ready;}
+          if(target.hp>0){grip={vamp,target,x:nx*dir,y:ny*dir,next:t+.4,end:t+.4*vampTicks,ticks:0};}
         }
       }
       contact=true;
@@ -213,7 +216,7 @@ function update(dt){
   }
   beams=beams.filter(l=>l.until>t);
   for(const l of beams)for(const s of balls)if(s!==l.owner){
-    const d=distLine(s,l);if(d<=R&&!l.touch.has(s)){l.touch.add(s);change(s,-2);}
+    const d=distLine(s,l);if(d<=R&&!l.touch.has(s)){l.touch.add(s);if(t>=s.laserReady){change(s,-laserHit);s.laserReady=t+laserCooldown;}}
     else if(d>R+2)l.touch.delete(s);
   }
   floats=floats.filter(f=>t-f.start<.65);sparks=sparks.filter(f=>t-f.start<.3);
