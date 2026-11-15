@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#000000">
-<title>彈球競技場 · Bounce Ball Arena</title>
+<title>Ball Arena · 彈球競技場</title>
 <style>
 :root{color-scheme:dark;--accent:#dbff68;--muted:#b0b0ba;--edge:#323239;font-family:system-ui,sans-serif;background:#000;color:#fff}*{box-sizing:border-box}body{margin:0}button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,canvas:focus-visible{outline:2px solid #fff;outline-offset:4px}button:disabled{cursor:not-allowed;opacity:.4}[hidden]{display:none!important}
 .screen{width:min(100% - 36px,840px);margin:auto}.home{min-height:100svh;display:grid;place-items:center}.px{height:1em;width:auto;display:inline-block;vertical-align:middle;fill:currentColor;shape-rendering:crispEdges}.primary{border:2px solid var(--accent);background:var(--accent);color:#080b00;padding:13px 22px;box-shadow:5px 5px 0 #61782a;font-size:20px}.primary:hover{background:#ecffa9}.home .primary{font-size:clamp(28px,7vw,44px);padding:20px 32px;box-shadow:8px 8px 0 #61782a}
@@ -19,18 +19,21 @@
 @media(max-width:380px){.shop-item{padding:9px}.shop-item small{font-size:12px}}
 .merchant-scene{display:grid;place-items:center;padding:16px;margin-top:12px;border:1px solid #3a3242;background:radial-gradient(ellipse at 50% 100%,#292034,#0a090d 72%)}.merchant-npc{display:grid;justify-items:center;gap:8px;background:none;color:#ffdc7a;border:1px solid transparent;padding:5px 16px 8px;font-weight:700}.merchant-npc svg{width:64px;height:64px}.merchant-npc:hover{border-color:#ffdc7a}.merchant-npc[aria-expanded=true]{color:#fff}.merchant-scene+div .intro{margin:10px 0}
 .merchant-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0 12px}.merchant-toolbar button{color:#ffd766;border-color:#806c37}.shop-item.lucky{border-color:#f0ca58;background:#272013;box-shadow:inset 0 0 14px #f0ca581a}.shop-item .lucky-badge{font-weight:800;color:#ffde71;margin-inline-start:6px;display:inline-block}
+.home-stack{text-align:center;width:100%;padding:18px 0 37px}.home-stack .eyebrow{letter-spacing:.32em}.home-stack h1{font-size:clamp(39px,10vw,94px);color:var(--accent);filter:drop-shadow(4px 5px 0 #445319)}.home-orbs{display:flex;justify-content:center;gap:12px;margin:25px 0 35px}.home-orbs i{width:12px;height:12px;background:#ff5778;clip-path:polygon(25% 0,75% 0,75% 25%,100% 25%,100% 75%,75% 75%,75% 100%,25% 100%,25% 75%,0 75%,0 25%,25% 25%)}.home-orbs i:nth-child(2){background:#c185ff}.home-orbs i:nth-child(3){background:#54defa}.chest-stage{margin:14px 0;padding:18px;border:1px solid #705b36;background:radial-gradient(ellipse at 50% 27%,#3c2918,#121015 66%);display:grid;justify-items:center;gap:12px;text-align:center}.chest-stage>svg{width:68px;height:60px}.skin-reveal{color:#efdca9;min-height:2.8em;line-height:1.5}.skin-chip{display:inline-block;width:12px;height:12px;margin-inline-end:7px;background:var(--skin-color);clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%)}.skin-row.r{border-color:#597ec0}.skin-row.sr{border-color:#f0b958;background:#282015}.skin-tier{display:inline-block;margin-inline-end:7px;font:bold 12px monospace;color:#d0d0da}.skin-tier.r{color:#9dbcff}.skin-tier.sr{color:#ffdb69}.skin-row b span:not(.skin-tier){color:#fff;font-weight:700;font-size:15px}.skin-row .secondary[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}.chest-stage .primary:disabled{opacity:.52}
 </style>
 </head>
 <body>
 <main>
-<section id="home" class="screen home"><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></section>
+<section id="home" class="screen home"><div class="home-stack">
+<p class="eyebrow">ARCADE TOWER RUN</p><h1 aria-label="Ball Arena"><span data-pixel="BALL ARENA"></span></h1>
+<div class="home-orbs" aria-hidden="true"><i></i><i></i><i></i></div><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></div></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.4.4 · LUCKY MERCHANT</p>
+<p class="eyebrow"><span data-pixel="BALL ARENA"></span> / V0.5 · SKIN CHEST</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
 <p class="intro">選球時可購買或配置裝備。爬塔途中偶爾會遇到商人，沒花完的金幣會在結算後存進錢包。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
 <p class="hint" id="selectLoadout"></p>
-<div class="choose-footer"><strong id="selectGold" class="gold"></strong><button class="secondary" id="browseShop">裝備商店</button><button class="primary" id="enter" aria-label="開始爬塔" disabled>開始爬塔</button></div>
+<div class="choose-footer"><strong id="selectGold" class="gold"></strong><button class="secondary" id="browseShop">裝備商店</button><button class="secondary" id="browseSkins">皮膚寶箱</button><button class="primary" id="enter" aria-label="開始爬塔" disabled>開始爬塔</button></div>
 </section>
 <section id="shop" class="screen select-screen" hidden>
 <p class="eyebrow">EQUIPMENT SHOP</p>
@@ -39,6 +42,20 @@
 <p class="intro">裝備與金幣跨局保留。購買後可在這裡選擇是否裝備，爬塔途中不能更換。</p>
 <div class="shop-grid" id="shopItems"></div>
 <div class="choose-footer"><span id="shopNotice" class="hint" aria-live="polite"></span><button id="leaveShop" class="primary">回到選球</button></div>
+</section>
+<section id="skins" class="screen select-screen" hidden>
+<p class="eyebrow">PIXEL SKIN COLLECTION</p>
+<h1>皮膚寶箱</h1>
+<div class="shop-status"><span>每次抽取 30 G</span><strong class="gold" id="skinGold" aria-live="polite"></strong></div>
+<div class="chest-stage" id="chestStage">
+<svg viewBox="0 0 32 28" aria-hidden="true" shape-rendering="crispEdges"><path fill="#653b24" d="M4 3h24v3h2v16h-2v3H4v-3H2V6h2z"/><path fill="#e69338" d="M5 5h22v7H5zm0 10h22v7H5z"/><path fill="#ffd973" d="M6 5h3v17H6zm17 0h3v17h-3zM3 11h26v4H3z"/><path fill="#fff0af" d="M13 10h6v8h-6z"/><path fill="#52321f" d="M15 12h2v4h-2z"/></svg>
+<div id="skinReveal" class="skin-reveal" aria-live="polite">替下一趟爬塔收集新皮膚。</div>
+<button id="openChest" class="primary" type="button">開寶箱 · 30 G</button>
+</div>
+<p class="intro">N 75%／R 20%／SR 5%。同時只裝一款，所有球種通用。完全相同的皮膚與屬性會合併成收藏數量，不會疊加效果。</p>
+<h2>我的收藏</h2>
+<div class="shop-grid" id="skinItems"></div>
+<div class="choose-footer"><button id="leaveSkins" class="secondary" type="button">回到選球</button></div>
 </section>
 <section id="merchant" class="screen select-screen" hidden>
 <p class="eyebrow" id="merchantFloor"></p>
@@ -113,10 +130,13 @@ for (const [i,t] of types.entries()){
   $('roster').append(b);
 }
 let screen='home';
-function show(next){if(next!==screen&&screen==='play'){stop();drag=null;} if(next==='select')renderSelection();for(const name of ['home','select','shop','merchant','play'])$(name).hidden=name!==next;screen=next;}
-$('start').onclick=()=>{unlockSound();show('select');$('roster').firstElementChild.focus();};
+function show(next){if(next!==screen&&screen==='play'){stop();drag=null;} if(next==='select')renderSelection();for(const name of ['home','select','shop','skins','merchant','play'])$(name).hidden=name!==next;screen=next;}
+$('start').onclick=()=>{const soundReady=unlockSound();if(soundReady)soundReady.then(()=>arcadeCue('start'));else arcadeCue('start');show('select');$('roster').firstElementChild.focus();};
 $('enter').onclick=()=>{if(!selection)return;show('play');beginRun();};
 $('browseShop').onclick=()=>openShop();
+$('browseSkins').onclick=()=>openSkinScreen();
+$('leaveSkins').onclick=()=>{show('select');$('browseSkins').focus();};
+$('openChest').onclick=drawSkin;
 $('leaveShop').onclick=()=>{show('select');$('browseShop').focus();};
 function leaveRun(){
   if(state!=='end')bankRun(run.gold);
@@ -153,6 +173,7 @@ function arenaPath(){ctx.beginPath();ctx.arc(C,C,RIM_RADIUS,0,Math.PI*2);ctx.clo
 const reducedMotion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
 let audio=null,soundOn=true,shake=null,lastHaptic=-Infinity;
 const lastTone={wall:-Infinity,body:-Infinity,crit:-Infinity};
+let lastCoinTone=-Infinity;
 try{soundOn=globalThis.localStorage?.getItem('bounce-arena-sound')!=='off';}catch{}
 function updateSoundButton(){
   $('sound').setAttribute('aria-pressed',String(soundOn));
@@ -170,7 +191,7 @@ function unlockSound(){
   if(!Audio)return;
   try{
     audio??=new Audio();
-    if(audio.state==='suspended'||audio.state==='interrupted')audio.resume().catch(()=>{});
+    if(audio.state==='suspended'||audio.state==='interrupted')return audio.resume().catch(()=>{});
   }catch{}
 }
 function impact(kind,dx,dy,power,own=true){
@@ -179,35 +200,62 @@ function impact(kind,dx,dy,power,own=true){
     // Keep a body hit's stronger shake if a ball bounces off a wall immediately afterwards.
     if(!shake||shake.playState!=='running'||crit||(body&&shake.impact!=='crit')){
       shake?.cancel();
-      const pixels=crit?11:(body?2.8:1.2)+(body?3.8:1.4)*strength, x=dx*pixels,y=dy*pixels;
+      const pixels=crit?15:(body?4:1.5)+(body?5:2)*strength, x=dx*pixels,y=dy*pixels;
       shake=cv.animate?.([
         {transform:'none'},
         {transform:'translate('+x+'px,'+y+'px)',offset:.19},
         {transform:'translate('+(-x*.48)+'px,'+(-y*.48)+'px)',offset:.46},
         {transform:'translate('+(x*.23)+'px,'+(y*.23)+'px)',offset:.72},
         {transform:'none'}
-      ],{duration:crit?270:body?185:105});
+      ],{duration:crit?310:body?210:110});
       if(shake)shake.impact=kind;
     }
     const now=performance.now();
     if((body||own)&&(crit||now-lastHaptic>=100)&&globalThis.navigator?.vibrate){
       lastHaptic=now;
-      try{globalThis.navigator.vibrate(crit?55:body?25:9);}catch{}
+      try{globalThis.navigator.vibrate(crit?[44,22,60]:body?38:12);}catch{}
     }
   }
   if(!soundOn||audio?.state!=='running')return;
   const now=audio.currentTime;
   if(now-lastTone[kind]<(body?.045:.06))return;
   lastTone[kind]=now;
-  const osc=audio.createOscillator(),volume=audio.createGain(),length=crit?.175:body?.115:.064;
-  osc.type=crit?'square':body?'triangle':'sine';
-  osc.frequency.setValueAtTime((crit?370:body?192:530)+strength*(body?82:150),now);
-  osc.frequency.exponentialRampToValueAtTime(body?76:230,now+length);
-  volume.gain.setValueAtTime(.0001,now);
-  volume.gain.exponentialRampToValueAtTime((crit?.13:body?.18:own?.085:.055)*(.65+.35*strength),now+.007);
-  volume.gain.exponentialRampToValueAtTime(.0001,now+length);
-  osc.connect(volume);volume.connect(audio.destination);osc.start(now);osc.stop(now+length+.01);
-  osc.onended=()=>{osc.disconnect();volume.disconnect();};
+  if(crit){
+    chip('square',493,now,.048,.10);
+    chip('square',740,now+.043,.056,.08);
+    chip('square',988,now+.087,.092,.08,660);
+    chip('triangle',113,now,.145,.13,48);
+  }else if(body){
+    chip('square',245+strength*102,now,.065,.09,105);
+    chip('triangle',130,now,.09,.115,56);
+  }else{
+    chip('square',610+strength*170,now,.039,own?.062:.040,335);
+  }
+}
+function chip(wave,hz,at,length,peak,endHz){
+  if(!audio||audio.state!=='running')return;
+  const osc=audio.createOscillator(),gain=audio.createGain();
+  osc.type=wave;osc.frequency.setValueAtTime(hz,at);
+  if(endHz)osc.frequency.setValueAtTime(endHz,at+length*.46);
+  gain.gain.setValueAtTime(.0001,at);
+  gain.gain.exponentialRampToValueAtTime(peak,at+.004);
+  gain.gain.exponentialRampToValueAtTime(.0001,at+length);
+  osc.connect(gain);gain.connect(audio.destination);
+  osc.start(at);osc.stop(at+length+.01);
+  osc.onended=()=>{osc.disconnect();gain.disconnect();};
+}
+function arcadeCue(kind){
+  if(!soundOn||audio?.state!=='running')return;
+  const now=audio.currentTime;
+  if(kind==='coin'){
+    if(now-lastCoinTone<.14)return;
+    lastCoinTone=now;
+  }
+  const melodies={start:[392,523,659],launch:[147,220,330],coin:[784,1175],win:[523,659,784,1047],lose:[392,294,196],N:[330,494,659],R:[392,523,659,988],SR:[523,659,784,1047,1319,1568]};
+  const tune=melodies[kind];
+  if(!tune)return;
+  const gap=kind==='coin'?.035:kind==='launch'?.028:.067;
+  tune.forEach((hz,i)=>chip(i%2===0?'square':'triangle',hz,now+i*gap,i===tune.length-1?gap*2:gap,.070));
 }
 let balls=[], beams=[], sparks=[], floats=[], shots=[], particles=[], coins=[], nextCoinAt=0, draftOptions=[], grip=null, contacts=new Set(), t=0, drag=null, state='idle', raf=0,last=0,acc=0,keyAim=null;
 const floors=[
@@ -227,11 +275,40 @@ const enemies={
   dummy:{id:'dummy',name:'訓練球',color:'#dedee7'},
   grunt:{id:'grunt',name:'撞擊球',color:'#ff966b'}
 };
-const newRun=()=>({floor:1,power:0,speed:0,dodge:0,gold:0,entryGold:0,hpBonus:0,equipment:{},settled:false,entryHp:0,drainCharge:0,nextMerchant:randomInt(5,10),merchantsPassed:0,merchant:null});
+const newRun=()=>({floor:1,power:0,speed:0,dodge:0,gold:0,entryGold:0,hpBonus:0,equipment:{},skin:null,settled:false,entryHp:0,drainCharge:0,nextMerchant:randomInt(5,10),merchantsPassed:0,merchant:null});
 let run=newRun();
 const shopPrices={armor:100,shield:105,spike:105,echo:110,mine:110,blade:115,regen:125,drain:125};
 const SHOP_SAVE_KEY='bounce-arena-equipment-v1';
-const freshProfile=()=>({gold:0,levels:{},equipped:{}});
+const CHEST_PRICE=30;
+const skinCatalog={
+  mint:{name:'薄荷像素',tier:'N',color:'#8effbf',accent:'#245b45',pattern:0},
+  cherry:{name:'櫻桃汽水',tier:'N',color:'#ff839a',accent:'#943b57',pattern:1},
+  aqua:{name:'青藍街機',tier:'N',color:'#7cd8ff',accent:'#226586',pattern:2},
+  dusk:{name:'暮紫方糖',tier:'N',color:'#bd99ff',accent:'#5e3a90',pattern:0},
+  ember:{name:'熔核',tier:'R',color:'#ffb55a',accent:'#b14622',pattern:2},
+  comet:{name:'冰尾彗星',tier:'R',color:'#94f2ff',accent:'#286ca2',pattern:1},
+  glitch:{name:'霓虹故障',tier:'R',color:'#dfff63',accent:'#657d20',pattern:0},
+  nova:{name:'超新星',tier:'SR',color:'#ffdb70',accent:'#bb6b18',pattern:2},
+  prism:{name:'虹光晶核',tier:'SR',color:'#f7a0ff',accent:'#9a3a9c',pattern:1},
+  eclipse:{name:'月蝕之眼',tier:'SR',color:'#e2deff',accent:'#6951c8',pattern:0}
+};
+const skinAttrs={hp:'血量',power:'力量',speed:'速度'};
+const freshProfile=()=>({gold:0,levels:{},equipped:{},skins:{},activeSkin:null});
+function skinKey(skin){
+  return [skin.id,...Object.keys(skinAttrs).map(id=>skin.stats[id]||0)].join(':');
+}
+function validSkin(raw){
+  if(!raw||typeof raw.id!=='string'||!Object.hasOwn(skinCatalog,raw.id)||!raw.stats||typeof raw.stats!=='object')return null;
+  const tier=skinCatalog[raw.id].tier, stats={};
+  const keys=Object.keys(raw.stats);
+  if(keys.length!==(tier==='N'?0:tier==='R'?1:2))return null;
+  for(const id of keys){
+    const n=raw.stats[id];
+    if(!Object.hasOwn(skinAttrs,id)||!Number.isInteger(n)||n<(tier==='SR'?2:1)||n>(tier==='SR'?4:3))return null;
+    stats[id]=n;
+  }
+  return {id:raw.id,stats,copies:Number.isSafeInteger(raw.copies)&&raw.copies>0?raw.copies:1};
+}
 function loadProfile(){
   const value=freshProfile();
   try{
@@ -244,6 +321,11 @@ function loadProfile(){
         value.levels[id]=level;value.equipped[id]=saved.equipped?.[id]!==false;
       }
     }
+    for(const raw of Object.values(saved.skins||{})){
+      const skin=validSkin(raw);
+      if(skin)value.skins[skinKey(skin)]=skin;
+    }
+    if(typeof saved.activeSkin==='string'&&Object.hasOwn(value.skins,saved.activeSkin))value.activeSkin=saved.activeSkin;
   }catch{}
   return value;
 }
@@ -260,7 +342,67 @@ function gearPrice(id){
 function renderSelection(){
   $('selectGold').textContent=profile.gold+' G';
   const names=Object.keys(shopPrices).filter(id=>profile.levels[id]&&profile.equipped[id]).map(id=>itemFor(id).name+' Lv.'+profile.levels[id]);
-  $('selectLoadout').textContent=names.length?'已裝備 · '+names.join('／'):'尚未配置裝備';
+  const skin=profile.skins[profile.activeSkin],look=skin?skinCatalog[skin.id].tier+' '+skinCatalog[skin.id].name:'原始外觀';
+  $('selectLoadout').textContent='皮膚 · '+look+' ｜ '+(names.length?'裝備 · '+names.join('／'):'尚未配置裝備');
+}
+function skinBonuses(skin){
+  const n=skin.stats;
+  return Object.keys(skinAttrs).filter(k=>n[k]).map(k=>skinAttrs[k]+' Lv.'+n[k]+'（'+(k==='hp'?'最大 HP +'+n[k]*4:k==='power'?'力量 +'+n[k]:'基準球速 +'+n[k]*8+'%')+'）').join('／')||'純外觀，無屬性加成';
+}
+function rollSkin(){
+  const chance=Math.random(),tier=chance<.75?'N':chance<.95?'R':'SR';
+  const pool=Object.keys(skinCatalog).filter(id=>skinCatalog[id].tier===tier);
+  const skin={id:pool[randomInt(0,pool.length-1)],stats:{},copies:1};
+  const stats=Object.keys(skinAttrs);
+  for(let i=0;i<(tier==='N'?0:tier==='R'?1:2);i++){
+    const id=stats.splice(randomInt(0,stats.length-1),1)[0];
+    skin.stats[id]=tier==='SR'?randomInt(2,4):randomInt(1,3);
+  }
+  return skin;
+}
+function openSkinScreen(){
+  if(screen!=='select')return;
+  show('skins');$('skinReveal').textContent='替下一趟爬塔收集新皮膚。';
+  renderSkins();($('openChest').disabled?$('leaveSkins'):$('openChest')).focus();
+}
+function drawSkin(){
+  if(screen!=='skins'||profile.gold<CHEST_PRICE)return false;
+  const soundReady=unlockSound(),skin=rollSkin(),key=skinKey(skin),look=skinCatalog[skin.id],duplicate=Object.hasOwn(profile.skins,key);
+  profile.gold-=CHEST_PRICE;
+  if(duplicate)profile.skins[key].copies++;
+  else profile.skins[key]=skin;
+  saveProfile();renderSkins();
+  $('skinReveal').textContent=(look.tier==='SR'?'★ 稀有入手！ ':'')+look.tier+' · '+look.name+(duplicate?'（重複收藏）':'')+' ｜ '+skinBonuses(skin);
+  if(soundReady)soundReady.then(()=>arcadeCue(look.tier));else arcadeCue(look.tier);
+  if(!reducedMotion?.matches){
+    $('chestStage').animate?.([{transform:'translateY(0)'},{transform:'translateY(-5px)'},{transform:'translateY(0)'}],{duration:look.tier==='SR'?380:240});
+    if(look.tier!=='N'){try{globalThis.navigator?.vibrate?.(look.tier==='SR'?[38,34,65]:24);}catch{}}
+  }
+  if($('openChest').disabled)$('leaveSkins').focus();
+  return true;
+}
+function renderSkins(focusKey){
+  $('skinGold').textContent=profile.gold+' G';$('openChest').disabled=profile.gold<CHEST_PRICE;
+  $('skinItems').replaceChildren();
+  const rank={SR:0,R:1,N:2};
+  const entries=Object.entries(profile.skins).sort((a,b)=>rank[skinCatalog[a[1].id].tier]-rank[skinCatalog[b[1].id].tier]);
+  for(const [key,skin] of [[null,null],...entries]){
+    const look=skin?skinCatalog[skin.id]:null,tier=look?.tier.toLowerCase()||'';
+    const cell=document.createElement('article');cell.className='shop-item skin-row '+tier;
+    const title=document.createElement('b');
+    if(look){
+      const icon=document.createElement('i');icon.className='skin-chip';icon.style.setProperty('--skin-color',look.color);title.append(icon);
+      const badge=document.createElement('span');badge.className='skin-tier '+tier;badge.textContent=look.tier;title.append(badge);
+    }
+    const name=document.createElement('span');name.textContent=look?look.name+(skin.copies>1?' ×'+skin.copies:''):'原始外觀';title.append(name);
+    const info=document.createElement('small');info.textContent=skin?skinBonuses(skin):'使用球種的原始顏色，不加成';
+    const use=document.createElement('button');use.className='secondary';use.type='button';
+    const on=key===profile.activeSkin;
+    use.textContent=on?'使用中':'使用這款';use.setAttribute('aria-pressed',String(on));
+    use.onclick=()=>{if(screen==='skins'){profile.activeSkin=key;saveProfile();renderSkins(key);}};
+    cell.append(title);cell.append(info);cell.append(use);$('skinItems').append(cell);
+    if(key===focusKey)use.focus();
+  }
 }
 function openShop(){
   if(screen!=='select')return;
@@ -311,13 +453,15 @@ function toggleGear(id){
 }
 const REPAIR_RATE=.30, CLEAR_HEAL_RATE=.10;
 const gearCount=id=>run.equipment[id]||0;
-const persistentMaxHp=()=>selection.hp+run.hpBonus+4*gearCount('armor');
+const skinHp=()=>4*(run.skin?.stats.hp||0);
+const persistentMaxHp=()=>selection.hp+skinHp()+run.hpBonus+4*gearCount('armor');
 const specialGear={
   regen:{name:'再生裝置',desc:'每級使通關時回復最大血量的 10%。'},
   drain:{name:'吸血核心',desc:'每級將本體撞擊實際造成傷害的 20% 轉為回血。不含副武器。'}
 };
 function beginRun(){
-  run=newRun();
+  run=newRun();run.skin=profile.skins[profile.activeSkin]||null;
+  run.power=run.skin?.stats.power||0;run.speed=run.skin?.stats.speed||0;
   for(const id of Object.keys(shopPrices))if(profile.equipped[id]&&profile.levels[id])run.equipment[id]=profile.levels[id];
   reset(persistentMaxHp());
 }
@@ -336,12 +480,12 @@ function reset(remainingHp=run.entryHp||selection.hp,focus=true){
   list.forEach(([id,hp],i)=>balls.push(make({...enemies[id],hp},W*.76,W*(i+1)/(list.length+1),1,i+1)));
   for(const enemy of balls.slice(1)){place(enemy,enemy.x,enemy.y);enemy.pressure=run.floor>=5?Math.floor((run.floor-2)/3):0;}
   beams=[];sparks=[];floats=[];shots=[];particles=[];coins=[];nextCoinAt=.9+Math.random()*1.6;draftOptions=[];contacts=new Set();grip=null;t=0;drag=null;keyAim=null;state='idle';
-  balls[0].maxHp+=run.hpBonus;
+  balls[0].maxHp+=run.hpBonus+skinHp();
   for(const card of cards)for(let i=0;i<gearCount(card.id);i++)grant(balls[0],card);
   balls[0].hp=clamp(remainingHp,0,balls[0].maxHp);
   run.entryHp=balls[0].hp;run.entryGold=run.gold;
   floats=[];
-  pixel($('name0'),selection.name);$('fighter0').style.setProperty('--ball',selection.color);
+  pixel($('name0'),selection.name);$('fighter0').style.setProperty('--ball',run.skin?skinCatalog[run.skin.id].color:selection.color);
   $('fighter1').style.setProperty('--ball',enemies[list[0][0]].color);
   $('floorLabel').textContent='第 '+run.floor+' 層 · '+label;
   $('floorEnemy').textContent=list.map(([id])=>enemies[id].name).join(' ＋ ');
@@ -366,7 +510,7 @@ function hud(){
   const gearTotal=Object.values(run.equipment).reduce((a,b)=>a+b,0);
   $('loadout0').textContent='永久 · 力量 '+run.power+' ／ 速度 '+run.speed+' ／ 裝備 '+gearTotal+(passives.length?' · '+passives.join('／'):'');
   const owned=cards.filter(c=>count(b,c.id)).map(c=>c.name+(count(b,c.id)>1?' ×'+count(b,c.id):''));
-  $('loadout1').textContent=owned.length?'起始裝備 · '+owned.join('／'):'';
+  $('loadout1').textContent=[run.skin?'皮膚 · '+skinCatalog[run.skin.id].name:'',owned.length?'起始裝備 · '+owned.join('／'):''].filter(Boolean).join(' ｜ ');
 }
 function point(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left-cv.clientLeft)*W/cv.clientWidth,y:(e.clientY-r.top-cv.clientTop)*W/cv.clientHeight};}
 function legal(p){return inset(p,R+1);}
@@ -374,7 +518,8 @@ function vec(a,b){const x=a.x-b.x,y=a.y-b.y,n=hypot(x,y);return{x:n?x/n:0,y:n?y/
 function pullVector(d,end){const v=vec(d.raw,end);v.n*=400/W;return v;}
 function launch(p,v){
   if(state!=='idle'||v.n<5)return;
-  unlockSound();drag=null;keyAim=null;state='run';
+  const ready=unlockSound();if(ready)ready.then(()=>arcadeCue('launch'));else arcadeCue('launch');
+  drag=null;keyAim=null;state='run';
   const speed=clamp(125+v.n*2.15,140,390)*1.10*BASE_SPEED_GAIN*speedScale(balls[0]);
   Object.assign(balls[0],{...legal(p),vx:v.x*speed,vy:v.y*speed});
   const side=p.x<W/2?W*.77:W*.23;
@@ -592,7 +737,7 @@ function change(b,delta,selfCost=false){
   floats.push({x:b.x,y:b.y,start:t,label:n>0?'+'+n:String(n),color:n>0?'#dfff69':'#ff7991'});return n;
 }
 function earnGold(amount,x,y){
-  run.gold+=amount;
+  run.gold+=amount;arcadeCue('coin');
   floats.push({x,y,start:t,label:'+'+amount+' G',color:'#ffd766',gold:true});
 }
 function settleEnemyDrops(){
@@ -685,8 +830,8 @@ function distLine(p,l){const dx=l.b.x-l.a.x,dy=l.b.y-l.a.y;
   return hypot(p.x-l.a.x-k*dx,p.y-l.a.y-k*dy);
 }
 function finish(won){
-  if(won){offerReward();return;}
-  state='end';stop();bankRun(run.gold);
+  if(won){arcadeCue('win');offerReward();return;}
+  state='end';stop();arcadeCue('lose');bankRun(run.gold);
   $('outcome').textContent='止步第 '+run.floor+' 層';
   $('reason').textContent=balls[0].hp<=0?'血量歸零。本次爬塔結束。':'時間到，敵人還沒清完。';
   $('hint').textContent='已通過 '+(run.floor-1)+' 層 · 本次帶回 '+run.gold+' G';$('result').hidden=false;$('again').focus();
@@ -836,8 +981,15 @@ function line(x,y,X,Y,color,width=1){
 }
 function sprite(b,x=b.x,y=b.y,aim=false){
   x=Math.round(x);y=Math.round(y);
-  ctx.fillStyle=b.flash>t?'#fff':b.type.color;
+  const look=b.team===0&&run.skin?skinCatalog[run.skin.id]:null;
+  ctx.fillStyle=b.flash>t?'#fff':look?.color||b.type.color;
   for(const [off,width,high] of [[-13,12,2],[-11,20,3],[-8,24,3],[-5,26,10],[5,24,3],[8,20,3],[11,12,2]])ctx.fillRect(x-width/2,y+off,width,high);
+  if(look){
+    ctx.fillStyle=look.accent;
+    if(look.pattern===0){ctx.fillRect(x-8,y-9,16,2);ctx.fillRect(x-6,y+7,12,2);}
+    else if(look.pattern===1){ctx.fillRect(x-9,y-9,4,3);ctx.fillRect(x+5,y+6,4,3);ctx.fillRect(x-7,y-6,3,2);}
+    else{for(const dx of [-8,0,8]){ctx.fillRect(x+dx-1,y-8,3,2);ctx.fillRect(x+dx-1,y+7,3,2);}}
+  }
   ctx.fillStyle='#111117';ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.hp,x,y+1);
   if(aim)return;
   if(b.shield){ctx.strokeStyle='#7af5ec';ctx.strokeRect(x-18.5,y-18.5,37,37);}
