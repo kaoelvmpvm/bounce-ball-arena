@@ -22,15 +22,18 @@
 .home-stack{text-align:center;width:100%;padding:18px 0 37px}.home-stack .eyebrow{letter-spacing:.32em}.home-stack h1{font-size:clamp(39px,10vw,94px);color:var(--accent);filter:drop-shadow(4px 5px 0 #445319)}.home-orbs{display:flex;justify-content:center;gap:12px;margin:25px 0 35px}.home-orbs i{width:12px;height:12px;background:#ff5778;clip-path:polygon(25% 0,75% 0,75% 25%,100% 25%,100% 75%,75% 75%,75% 100%,25% 100%,25% 75%,0 75%,0 25%,25% 25%)}.home-orbs i:nth-child(2){background:#c185ff}.home-orbs i:nth-child(3){background:#54defa}.chest-stage{margin:14px 0;padding:18px;border:1px solid #705b36;background:radial-gradient(ellipse at 50% 27%,#3c2918,#121015 66%);display:grid;justify-items:center;gap:12px;text-align:center}.chest-stage>svg{width:68px;height:60px}.skin-reveal{color:#efdca9;min-height:2.8em;line-height:1.5}.skin-chip{display:inline-block;width:12px;height:12px;margin-inline-end:7px;background:var(--skin-color);clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%)}.skin-row.r{border-color:#597ec0}.skin-row.sr{border-color:#f0b958;background:#282015}.skin-tier{display:inline-block;margin-inline-end:7px;font:bold 12px monospace;color:#d0d0da}.skin-tier.r{color:#9dbcff}.skin-tier.sr{color:#ffdb69}.skin-row b span:not(.skin-tier){color:#fff;font-weight:700;font-size:15px}.skin-row .secondary[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}.chest-stage .primary:disabled{opacity:.52}
 .skin-result{position:fixed;inset:0;margin:auto;max-height:calc(100% - 30px);width:min(380px,calc(100% - 30px));background:#17141b;border:2px solid var(--reveal-color,#e2d4af);color:white;padding:19px;text-align:center;box-shadow:6px 6px 0 #000;font:inherit}.skin-result:not([open]){display:none}.skin-result::backdrop{background:#08070ce6}.skin-result h2{margin:7px 0 9px;font-size:clamp(23px,6vw,32px)}.skin-result p{color:#d7cedb;line-height:1.5;margin:8px 0}.skin-result .primary{margin-top:12px}.result-tier{color:var(--reveal-color);font:bold 14px monospace;letter-spacing:.15em}.skin-result-art{position:relative;display:grid;place-items:center;height:146px;isolation:isolate;background:radial-gradient(circle at center,var(--reveal-halo,#ffffff20),transparent 70%)}#skinPreview{width:104px;height:104px;image-rendering:pixelated;position:relative;z-index:1}#skinParticles{position:absolute;inset:0;pointer-events:none;overflow:hidden}.skin-particle{position:absolute;left:50%;top:50%;width:var(--size);height:var(--size);background:var(--spark);animation:skin-spark var(--time) steps(18,end) var(--delay) both}@keyframes skin-spark{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}12%{opacity:1}75%{opacity:.85}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(150deg)}}.chest-stage[data-opening=true]{border-color:var(--reveal-color,#e2d4af);box-shadow:0 0 24px var(--reveal-halo,#ffffff20)}@media(prefers-reduced-motion:reduce){.skin-particle{animation:none;display:none}}
 .arena-clock{text-align:center}.arena-clock .progress{white-space:nowrap;margin-top:1px}.nudge-controls{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;padding:7px 8px;border:1px solid #34353a}.nudge-controls b{font-size:13px;color:#8df5dd}.nudge-controls small{display:block;font-size:11px;color:var(--muted);margin-top:3px}.nudge-actions{display:flex;gap:5px}.nudge-actions button{white-space:nowrap;padding:6px 8px;color:#a2f8e7}.nudge-actions kbd{color:#b9b9c1;font-size:10px}@media(pointer:coarse){.nudge-actions button{padding:9px 9px}.nudge-actions kbd{display:none}}
+.home-stack{position:relative}.dev-title{appearance:none;background:none;border:0;padding:0;color:inherit;font:inherit;line-height:1.1;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}.dev-title .px{pointer-events:none}.dev-coins{position:absolute;inset:-70px -8px -30px;overflow:hidden;pointer-events:none;z-index:3}.dev-coin{position:absolute;left:50%;top:43%;width:var(--size);height:var(--size);background:var(--coin);box-shadow:inset 2px 0 #fff3b088;clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%);animation:dev-gold var(--life) cubic-bezier(.16,.62,.35,1) var(--delay) both}.dev-reward{position:absolute;left:0;right:0;top:calc(100% - 23px);min-height:2em;color:#ffdd72;font:bold 14px monospace;pointer-events:none}@keyframes dev-gold{0%{transform:translate(-50%,0) scale(.45);opacity:0}11%{opacity:1}72%{opacity:1}100%{transform:translate(var(--x),var(--y)) rotate(var(--spin));opacity:0}}@media(prefers-reduced-motion:reduce){.dev-coin{display:none;animation:none}}
 </style>
 </head>
 <body>
 <main>
 <section id="home" class="screen home"><div class="home-stack">
-<p class="eyebrow">ARCADE TOWER RUN</p><h1 aria-label="Ball Arena"><span data-pixel="BALL ARENA"></span></h1>
+<p class="eyebrow">ARCADE TOWER RUN</p><h1><button id="devTitle" class="dev-title" type="button" aria-label="Ball Arena"><span data-pixel="BALL ARENA"></span></button></h1>
+<div id="devCoinBurst" class="dev-coins" aria-hidden="true"></div>
+<div id="devReward" class="dev-reward" role="status" aria-live="polite"></div>
 <div class="home-orbs" aria-hidden="true"><i></i><i></i><i></i></div><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></div></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BALL ARENA"></span> / V0.5.2 · PINBALL NUDGE</p>
+<p class="eyebrow"><span data-pixel="BALL ARENA"></span> / V0.5.3 · PINBALL NUDGE</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
 <p class="intro">選球時可購買或配置裝備。爬塔途中偶爾會遇到商人，沒花完的金幣會在結算後存進錢包。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
@@ -147,8 +150,9 @@ for (const [i,t] of types.entries()){
   b.onclick=()=>{selection=t;for(const c of $('roster').children)c.setAttribute('aria-pressed',String(c===b));$('enter').disabled=false;};
   $('roster').append(b);
 }
-let screen='home';
-function show(next){if(next!==screen&&screen==='play'){stop();drag=null;} if(next==='select')renderSelection();for(const name of ['home','select','shop','skins','merchant','play'])$(name).hidden=name!==next;screen=next;}
+let screen='home',devTaps=0,devLastTap=-Infinity,devCoinsTimer=0;
+function show(next){if(next!=='home'){devTaps=0;devLastTap=-Infinity;}if(next!==screen&&screen==='play'){stop();drag=null;} if(next==='select')renderSelection();for(const name of ['home','select','shop','skins','merchant','play'])$(name).hidden=name!==next;screen=next;}
+$('devTitle').onclick=devTitleTap;
 $('start').onclick=()=>{const soundReady=unlockSound();if(soundReady)soundReady.then(()=>arcadeCue('start'));else arcadeCue('start');show('select');$('roster').firstElementChild.focus();};
 $('enter').onclick=()=>{if(!selection)return;show('play');beginRun();};
 $('browseShop').onclick=()=>openShop();
@@ -281,7 +285,7 @@ function arcadeCue(kind){
     if(now-lastCoinTone<.14)return;
     lastCoinTone=now;
   }
-  const melodies={nudge:[155,207,311],shrink:[659,523,349],start:[392,523,659],launch:[147,220,330],coin:[784,1175],win:[523,659,784,1047],lose:[392,294,196],N:[330,494,659],R:[392,523,659,988],SR:[523,659,784,1047,1319,1568]};
+  const melodies={devGold:[392,523,659,784,1047,1319],nudge:[155,207,311],shrink:[659,523,349],start:[392,523,659],launch:[147,220,330],coin:[784,1175],win:[523,659,784,1047],lose:[392,294,196],N:[330,494,659],R:[392,523,659,988],SR:[523,659,784,1047,1319,1568]};
   const tune=melodies[kind];
   if(!tune)return;
   const gap=kind==='coin'?.035:kind==='launch'?.028:.067;
@@ -367,6 +371,28 @@ function loadProfile(){
 }
 const profile=loadProfile();
 function saveProfile(){try{globalThis.localStorage?.setItem(SHOP_SAVE_KEY,JSON.stringify(profile));}catch{}}
+function devTitleTap(){
+  if(screen!=='home')return;
+  const now=performance.now();
+  devTaps=now-devLastTap<=700?devTaps+1:1;devLastTap=now;
+  if(devTaps!==5)return;
+  devTaps=0;devLastTap=-Infinity;
+  const amount=10000;
+  profile.gold+=amount;saveProfile();
+  $('devReward').textContent='開發者獎勵 · +10,000 G';
+  const ready=unlockSound();if(ready)ready.then(()=>arcadeCue('devGold'));else arcadeCue('devGold');
+  const root=$('devCoinBurst');root.replaceChildren();clearTimeout(devCoinsTimer);
+  if(reducedMotion?.matches)return;
+  for(let i=0;i<44;i++){
+    const angle=i*2.399963,span=36+(i*19)%170;
+    const coin=document.createElement('i');coin.className='dev-coin';
+    const vars={'--x':Math.round(Math.cos(angle)*span)+'px','--y':Math.round(Math.sin(angle)*span-14)+'px','--spin':(i%2?-1:1)*(90+i*13)+'deg','--size':8+i%7+'px','--life':690+i%9*50+'ms','--delay':i%9*17+'ms','--coin':['#ffce4c','#ee9e26','#fff294'][i%3]};
+    for(const [k,v] of Object.entries(vars))coin.style.setProperty(k,v);
+    root.append(coin);
+  }
+  try{globalThis.navigator?.vibrate?.([30,20,55]);}catch{}
+  devCoinsTimer=setTimeout(()=>root.replaceChildren(),1350);
+}
 function bankRun(amount){
   if(run.settled)return;
   run.settled=true;profile.gold+=amount;saveProfile();
