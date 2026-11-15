@@ -20,6 +20,7 @@
 .merchant-scene{display:grid;place-items:center;padding:16px;margin-top:12px;border:1px solid #3a3242;background:radial-gradient(ellipse at 50% 100%,#292034,#0a090d 72%)}.merchant-npc{display:grid;justify-items:center;gap:8px;background:none;color:#ffdc7a;border:1px solid transparent;padding:5px 16px 8px;font-weight:700}.merchant-npc svg{width:64px;height:64px}.merchant-npc:hover{border-color:#ffdc7a}.merchant-npc[aria-expanded=true]{color:#fff}.merchant-scene+div .intro{margin:10px 0}
 .merchant-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0 12px}.merchant-toolbar button{color:#ffd766;border-color:#806c37}.shop-item.lucky{border-color:#f0ca58;background:#272013;box-shadow:inset 0 0 14px #f0ca581a}.shop-item .lucky-badge{font-weight:800;color:#ffde71;margin-inline-start:6px;display:inline-block}
 .home-stack{text-align:center;width:100%;padding:18px 0 37px}.home-stack .eyebrow{letter-spacing:.32em}.home-stack h1{font-size:clamp(39px,10vw,94px);color:var(--accent);filter:drop-shadow(4px 5px 0 #445319)}.home-orbs{display:flex;justify-content:center;gap:12px;margin:25px 0 35px}.home-orbs i{width:12px;height:12px;background:#ff5778;clip-path:polygon(25% 0,75% 0,75% 25%,100% 25%,100% 75%,75% 75%,75% 100%,25% 100%,25% 75%,0 75%,0 25%,25% 25%)}.home-orbs i:nth-child(2){background:#c185ff}.home-orbs i:nth-child(3){background:#54defa}.chest-stage{margin:14px 0;padding:18px;border:1px solid #705b36;background:radial-gradient(ellipse at 50% 27%,#3c2918,#121015 66%);display:grid;justify-items:center;gap:12px;text-align:center}.chest-stage>svg{width:68px;height:60px}.skin-reveal{color:#efdca9;min-height:2.8em;line-height:1.5}.skin-chip{display:inline-block;width:12px;height:12px;margin-inline-end:7px;background:var(--skin-color);clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%)}.skin-row.r{border-color:#597ec0}.skin-row.sr{border-color:#f0b958;background:#282015}.skin-tier{display:inline-block;margin-inline-end:7px;font:bold 12px monospace;color:#d0d0da}.skin-tier.r{color:#9dbcff}.skin-tier.sr{color:#ffdb69}.skin-row b span:not(.skin-tier){color:#fff;font-weight:700;font-size:15px}.skin-row .secondary[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}.chest-stage .primary:disabled{opacity:.52}
+.skin-result{position:fixed;inset:0;margin:auto;max-height:calc(100% - 30px);width:min(380px,calc(100% - 30px));background:#17141b;border:2px solid var(--reveal-color,#e2d4af);color:white;padding:19px;text-align:center;box-shadow:6px 6px 0 #000;font:inherit}.skin-result:not([open]){display:none}.skin-result::backdrop{background:#08070ce6}.skin-result h2{margin:7px 0 9px;font-size:clamp(23px,6vw,32px)}.skin-result p{color:#d7cedb;line-height:1.5;margin:8px 0}.skin-result .primary{margin-top:12px}.result-tier{color:var(--reveal-color);font:bold 14px monospace;letter-spacing:.15em}.skin-result-art{position:relative;display:grid;place-items:center;height:146px;isolation:isolate;background:radial-gradient(circle at center,var(--reveal-halo,#ffffff20),transparent 70%)}#skinPreview{width:104px;height:104px;image-rendering:pixelated;position:relative;z-index:1}#skinParticles{position:absolute;inset:0;pointer-events:none;overflow:hidden}.skin-particle{position:absolute;left:50%;top:50%;width:var(--size);height:var(--size);background:var(--spark);animation:skin-spark var(--time) steps(18,end) var(--delay) both}@keyframes skin-spark{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}12%{opacity:1}75%{opacity:.85}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(150deg)}}.chest-stage[data-opening=true]{border-color:var(--reveal-color,#e2d4af);box-shadow:0 0 24px var(--reveal-halo,#ffffff20)}@media(prefers-reduced-motion:reduce){.skin-particle{animation:none;display:none}}
 </style>
 </head>
 <body>
@@ -28,7 +29,7 @@
 <p class="eyebrow">ARCADE TOWER RUN</p><h1 aria-label="Ball Arena"><span data-pixel="BALL ARENA"></span></h1>
 <div class="home-orbs" aria-hidden="true"><i></i><i></i><i></i></div><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></div></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BALL ARENA"></span> / V0.5 · SKIN CHEST</p>
+<p class="eyebrow"><span data-pixel="BALL ARENA"></span> / V0.5.1 · SKIN CHEST</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
 <p class="intro">選球時可購買或配置裝備。爬塔途中偶爾會遇到商人，沒花完的金幣會在結算後存進錢包。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
@@ -48,13 +49,25 @@
 <h1>皮膚寶箱</h1>
 <div class="shop-status"><span>每次抽取 30 G</span><strong class="gold" id="skinGold" aria-live="polite"></strong></div>
 <div class="chest-stage" id="chestStage">
-<svg viewBox="0 0 32 28" aria-hidden="true" shape-rendering="crispEdges"><path fill="#653b24" d="M4 3h24v3h2v16h-2v3H4v-3H2V6h2z"/><path fill="#e69338" d="M5 5h22v7H5zm0 10h22v7H5z"/><path fill="#ffd973" d="M6 5h3v17H6zm17 0h3v17h-3zM3 11h26v4H3z"/><path fill="#fff0af" d="M13 10h6v8h-6z"/><path fill="#52321f" d="M15 12h2v4h-2z"/></svg>
+<svg id="chestClosed" viewBox="0 0 32 28" aria-hidden="true" shape-rendering="crispEdges"><path fill="#653b24" d="M4 3h24v3h2v16h-2v3H4v-3H2V6h2z"/><path fill="#e69338" d="M5 5h22v7H5zm0 10h22v7H5z"/><path fill="#ffd973" d="M6 5h3v17H6zm17 0h3v17h-3zM3 11h26v4H3z"/><path fill="#fff0af" d="M13 10h6v8h-6z"/><path fill="#52321f" d="M15 12h2v4h-2z"/></svg>
+<svg id="chestOpened" viewBox="0 0 32 28" aria-hidden="true" shape-rendering="crispEdges" hidden><path fill="#653b24" d="M4 4h22v2h3v6H3V6h1zm-2 11h28v9h-2v2H4v-2H2z"/><path fill="#e69338" d="M6 6h19v4H6zm-1 11h22v6H5z"/><path fill="#ffd973" d="M6 16h3v8H6zm17 0h3v8h-3zM3 14h26v3H3z"/><path fill="#fff0af" d="M14 15h4v5h-4z"/><path fill="#fff8d5" d="M15 0h2v5h-2zm-4 8h2v4h-2zm9 0h2v4h-2z"/></svg>
 <div id="skinReveal" class="skin-reveal" aria-live="polite">替下一趟爬塔收集新皮膚。</div>
 <button id="openChest" class="primary" type="button">開寶箱 · 30 G</button>
 </div>
 <p class="intro">N 75%／R 20%／SR 5%。同時只裝一款，所有球種通用。完全相同的皮膚與屬性會合併成收藏數量，不會疊加效果。</p>
 <h2>我的收藏</h2>
 <div class="shop-grid" id="skinItems"></div>
+<dialog id="skinResult" class="skin-result" aria-labelledby="skinResultName" aria-describedby="skinResultStats">
+  <div class="skin-result-art">
+    <div id="skinParticles" aria-hidden="true"></div>
+    <canvas id="skinPreview" width="32" height="32" role="img"></canvas>
+  </div>
+  <div id="skinResultTier" class="result-tier"></div>
+  <h2 id="skinResultName"></h2>
+  <p id="skinResultStats"></p>
+  <p id="skinResultExtra"></p>
+  <button id="confirmSkin" class="primary" type="button" autofocus>確認</button>
+</dialog>
 <div class="choose-footer"><button id="leaveSkins" class="secondary" type="button">回到選球</button></div>
 </section>
 <section id="merchant" class="screen select-screen" hidden>
@@ -135,7 +148,9 @@ $('start').onclick=()=>{const soundReady=unlockSound();if(soundReady)soundReady.
 $('enter').onclick=()=>{if(!selection)return;show('play');beginRun();};
 $('browseShop').onclick=()=>openShop();
 $('browseSkins').onclick=()=>openSkinScreen();
-$('leaveSkins').onclick=()=>{show('select');$('browseSkins').focus();};
+$('leaveSkins').onclick=()=>{if(chestOpening)return;show('select');$('browseSkins').focus();};
+$('confirmSkin').onclick=confirmSkin;
+$('skinResult').addEventListener('cancel',e=>{e.preventDefault();confirmSkin();});
 $('openChest').onclick=drawSkin;
 $('leaveShop').onclick=()=>{show('select');$('browseShop').focus();};
 function leaveRun(){
@@ -280,6 +295,12 @@ let run=newRun();
 const shopPrices={armor:100,shield:105,spike:105,echo:110,mine:110,blade:115,regen:125,drain:125};
 const SHOP_SAVE_KEY='bounce-arena-equipment-v1';
 const CHEST_PRICE=30;
+const chestVfx={
+  N:{delay:520,stages:4,shake:4,vibration:[30,75,45],particles:12,color:'#d8d4ff',label:'一般'},
+  R:{delay:940,stages:8,shake:7,vibration:[80,90,100,120,160],particles:23,color:'#80baff',label:'稀有'},
+  SR:{delay:1480,stages:13,shake:11,vibration:[95,85,130,100,180,100,275],particles:38,color:'#ffd76a',label:'超稀有'}
+};
+let chestOpening=false, pendingSkin=null;
 const skinCatalog={
   mint:{name:'薄荷像素',tier:'N',color:'#8effbf',accent:'#245b45',pattern:0},
   cherry:{name:'櫻桃汽水',tier:'N',color:'#ff839a',accent:'#943b57',pattern:1},
@@ -366,23 +387,80 @@ function openSkinScreen(){
   renderSkins();($('openChest').disabled?$('leaveSkins'):$('openChest')).focus();
 }
 function drawSkin(){
-  if(screen!=='skins'||profile.gold<CHEST_PRICE)return false;
+  if(screen!=='skins'||chestOpening||profile.gold<CHEST_PRICE)return false;
   const soundReady=unlockSound(),skin=rollSkin(),key=skinKey(skin),look=skinCatalog[skin.id],duplicate=Object.hasOwn(profile.skins,key);
+  const fx=chestVfx[look.tier];
+  chestOpening=true;pendingSkin={skin,look,duplicate};
   profile.gold-=CHEST_PRICE;
   if(duplicate)profile.skins[key].copies++;
   else profile.skins[key]=skin;
-  saveProfile();renderSkins();
-  $('skinReveal').textContent=(look.tier==='SR'?'★ 稀有入手！ ':'')+look.tier+' · '+look.name+(duplicate?'（重複收藏）':'')+' ｜ '+skinBonuses(skin);
-  if(soundReady)soundReady.then(()=>arcadeCue(look.tier));else arcadeCue(look.tier);
-  if(!reducedMotion?.matches){
-    $('chestStage').animate?.([{transform:'translateY(0)'},{transform:'translateY(-5px)'},{transform:'translateY(0)'}],{duration:look.tier==='SR'?380:240});
-    if(look.tier!=='N'){try{globalThis.navigator?.vibrate?.(look.tier==='SR'?[38,34,65]:24);}catch{}}
+  saveProfile();
+  const stage=$('chestStage'),reduce=Boolean(reducedMotion?.matches),delay=reduce?220:fx.delay;
+  stage.dataset.opening='true';stage.setAttribute('aria-busy','true');
+  stage.style.setProperty('--reveal-color',fx.color);stage.style.setProperty('--reveal-halo',fx.color+'45');
+  $('skinGold').textContent=profile.gold+' G';$('openChest').disabled=true;
+  $('leaveSkins').disabled=true;$('skinItems').inert=true;
+  $('skinReveal').textContent='寶箱正在開啟…';
+  const windUp=()=>{
+    if(!chestOpening||!pendingSkin||!soundOn||audio?.state!=='running')return;
+    const at=audio.currentTime;
+    for(let i=0;i<fx.stages;i++){
+      const cue=delay/1000*.82*i/Math.max(1,fx.stages-1);
+      chip(i%2===0?'square':'triangle',145+i*31,at+cue,.055,.038);
+    }
+  };
+  if(soundReady)soundReady.then(windUp);else windUp();
+  if(!reduce){
+    const frames=[{transform:'none'}];
+    for(let i=0;i<fx.stages;i++){
+      const strength=fx.shake*(.30+.70*i/Math.max(1,fx.stages-1)),s=i%2===0?1:-1;
+      frames.push({transform:'translate('+s*strength+'px,'+(-strength*.24)+'px) rotate('+s*strength*.15+'deg)'});
+    }
+    frames.push({transform:'none'});
+    stage.animate?.(frames,{duration:delay,easing:'linear'});
+    try{globalThis.navigator?.vibrate?.(fx.vibration);}catch{}
   }
-  if($('openChest').disabled)$('leaveSkins').focus();
+  setTimeout(revealSkin,delay);
   return true;
 }
+function revealSkin(){
+  if(!chestOpening||!pendingSkin)return;
+  const {skin,look,duplicate}=pendingSkin,fx=chestVfx[look.tier],dialog=$('skinResult');
+  $('chestClosed').setAttribute('hidden','');$('chestOpened').removeAttribute('hidden');
+  $('chestStage').dataset.opening='false';$('chestStage').setAttribute('aria-busy','false');
+  $('skinReveal').textContent=look.tier+' · '+look.name;
+  dialog.style.setProperty('--reveal-color',fx.color);dialog.style.setProperty('--reveal-halo',fx.color+'46');
+  $('skinResultTier').textContent=look.tier+' · '+fx.label;
+  $('skinResultName').textContent=look.name;
+  $('skinResultStats').textContent=skinBonuses(skin);
+  $('skinResultExtra').textContent=duplicate?'重複入手，已加入收藏數量。':'新皮膚已加入收藏。';
+  const canvas=$('skinPreview'),preview=canvas.getContext('2d');
+  canvas.setAttribute('aria-label',look.name+'的實際球體外觀');
+  preview.clearRect(0,0,32,32);paintBall(preview,16,16,look.color,look);
+  createSkinParticles(fx,look);
+  dialog.showModal();$('confirmSkin').focus();arcadeCue(look.tier);
+}
+function createSkinParticles(fx,look){
+  const root=$('skinParticles');root.replaceChildren();
+  if(reducedMotion?.matches)return;
+  for(let i=0;i<fx.particles;i++){
+    const a=(i*2.399963)%(Math.PI*2),d=34+(i*17)%86;
+    const spark=document.createElement('i');spark.className='skin-particle';
+    const params={'--dx':Math.round(Math.cos(a)*d)+'px','--dy':Math.round(Math.sin(a)*d*.72)+'px','--size':3+i%5+'px','--time':540+fx.delay/3+i%6*33+'ms','--delay':i%6*21+'ms','--spark':[fx.color,look.color,'#ffffff'][i%3]};
+    for(const [k,v] of Object.entries(params))spark.style.setProperty(k,v);
+    root.append(spark);
+  }
+}
+function confirmSkin(){
+  if(!$('skinResult').open)return;
+  $('skinResult').close();$('skinParticles').replaceChildren();
+  pendingSkin=null;chestOpening=false;
+  $('chestOpened').setAttribute('hidden','');$('chestClosed').removeAttribute('hidden');
+  $('leaveSkins').disabled=false;$('skinItems').inert=false;
+  renderSkins();($('openChest').disabled?$('leaveSkins'):$('openChest')).focus();
+}
 function renderSkins(focusKey){
-  $('skinGold').textContent=profile.gold+' G';$('openChest').disabled=profile.gold<CHEST_PRICE;
+  $('skinGold').textContent=profile.gold+' G';$('openChest').disabled=chestOpening||profile.gold<CHEST_PRICE;
   $('skinItems').replaceChildren();
   const rank={SR:0,R:1,N:2};
   const entries=Object.entries(profile.skins).sort((a,b)=>rank[skinCatalog[a[1].id].tier]-rank[skinCatalog[b[1].id].tier]);
@@ -399,7 +477,7 @@ function renderSkins(focusKey){
     const use=document.createElement('button');use.className='secondary';use.type='button';
     const on=key===profile.activeSkin;
     use.textContent=on?'使用中':'使用這款';use.setAttribute('aria-pressed',String(on));
-    use.onclick=()=>{if(screen==='skins'){profile.activeSkin=key;saveProfile();renderSkins(key);}};
+    use.onclick=()=>{if(screen==='skins'&&!chestOpening){profile.activeSkin=key;saveProfile();renderSkins(key);}};
     cell.append(title);cell.append(info);cell.append(use);$('skinItems').append(cell);
     if(key===focusKey)use.focus();
   }
@@ -979,17 +1057,20 @@ function frame(now){
 function line(x,y,X,Y,color,width=1){
   ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(X,Y);ctx.stroke();
 }
+function paintBall(draw,x,y,color,look){
+  draw.fillStyle=color;
+  for(const [off,width,high] of [[-13,12,2],[-11,20,3],[-8,24,3],[-5,26,10],[5,24,3],[8,20,3],[11,12,2]])draw.fillRect(x-width/2,y+off,width,high);
+  if(look){
+    draw.fillStyle=look.accent;
+    if(look.pattern===0){draw.fillRect(x-8,y-9,16,2);draw.fillRect(x-6,y+7,12,2);}
+    else if(look.pattern===1){draw.fillRect(x-9,y-9,4,3);draw.fillRect(x+5,y+6,4,3);draw.fillRect(x-7,y-6,3,2);}
+    else{for(const dx of [-8,0,8]){draw.fillRect(x+dx-1,y-8,3,2);draw.fillRect(x+dx-1,y+7,3,2);}}
+  }
+}
 function sprite(b,x=b.x,y=b.y,aim=false){
   x=Math.round(x);y=Math.round(y);
   const look=b.team===0&&run.skin?skinCatalog[run.skin.id]:null;
-  ctx.fillStyle=b.flash>t?'#fff':look?.color||b.type.color;
-  for(const [off,width,high] of [[-13,12,2],[-11,20,3],[-8,24,3],[-5,26,10],[5,24,3],[8,20,3],[11,12,2]])ctx.fillRect(x-width/2,y+off,width,high);
-  if(look){
-    ctx.fillStyle=look.accent;
-    if(look.pattern===0){ctx.fillRect(x-8,y-9,16,2);ctx.fillRect(x-6,y+7,12,2);}
-    else if(look.pattern===1){ctx.fillRect(x-9,y-9,4,3);ctx.fillRect(x+5,y+6,4,3);ctx.fillRect(x-7,y-6,3,2);}
-    else{for(const dx of [-8,0,8]){ctx.fillRect(x+dx-1,y-8,3,2);ctx.fillRect(x+dx-1,y+7,3,2);}}
-  }
+  paintBall(ctx,x,y,b.flash>t?'#fff':look?.color||b.type.color,look);
   ctx.fillStyle='#111117';ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.hp,x,y+1);
   if(aim)return;
   if(b.shield){ctx.strokeStyle='#7af5ec';ctx.strokeRect(x-18.5,y-18.5,37,37);}
