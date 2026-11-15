@@ -15,27 +15,37 @@
 .progress{font:700 10px monospace;color:var(--muted);margin-top:5px;letter-spacing:.08em}.progress.ready{color:var(--accent)}.loadouts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;font-size:11px;color:var(--muted);line-height:1.5}.loadouts span:last-child{text-align:right}
 .draft{position:absolute;inset:2px;z-index:2;display:grid;align-items:center;overflow:auto;background:#08090dec;padding:12px}.draft h2{margin:3px 0 5px;font-size:clamp(19px,4vw,31px);color:var(--accent)}.draft p{margin:0 0 9px;color:var(--muted);font-size:12px}.offers{display:grid;gap:5px}.offer{display:grid;grid-template-columns:26px 1fr;gap:6px;text-align:left;align-items:center;border:1px solid #545563;background:#181920;color:#fff;padding:5px 8px;min-height:46px}.offer:hover,.offer:focus-visible{border-color:var(--accent);background:#262b16}.offer kbd{font:bold 13px monospace;color:var(--accent);text-align:center}.offer b{display:block;font-size:14px}.offer small{display:block;color:#c4c4cf;font-size:11px;line-height:1.35}
 .tower-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.tower-head .eyebrow{margin:0}.tower-head .hint{font-size:12px;text-align:right}.loadouts{grid-template-columns:1fr}.loadouts span:last-child{text-align:left}.controls{flex-wrap:wrap}.result>div{padding:12px}.play{max-width:440px}
+.gold,#shopGold{color:#ffd766;white-space:nowrap;font:bold 15px monospace}.shop-status{display:flex;justify-content:space-between;gap:12px;margin-top:14px;color:var(--muted)}.shop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.shop-item{padding:12px;border:1px solid #363640;background:#131317;display:flex;flex-direction:column;gap:7px}.shop-item small{color:var(--muted);line-height:1.45;flex:1}.shop-item button{text-align:left;width:100%;color:#ffd766}.shop-item b{font-size:15px}.shop-item span{color:var(--muted);font-size:12px;font-weight:400}.shop-item button:disabled{opacity:.55}
+@media(max-width:380px){.shop-item{padding:9px}.shop-item small{font-size:12px}}
 </style>
 </head>
 <body>
 <main>
 <section id="home" class="screen home"><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.3.4 · TOWER RUN</p>
+<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.4 · COIN SHOP</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
-<p class="intro">選一顆球開始爬塔。每層清完敵人才可升級，剩餘血量會帶到下一層。</p>
+<p class="intro">選一顆球開始爬塔。擊倒敵人或在場內撿金幣，即可在樓層之間購買裝備。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
-<div class="choose-footer"><span class="hint">TOWER MODE · 從第 1 層開始</span><button class="primary" id="enter" aria-label="開始爬塔" disabled>開始爬塔</button></div>
+<div class="choose-footer"><span class="hint">TOWER MODE · 從第 1 層開始</span><button class="secondary" id="browseShop">裝備商店</button><button class="primary" id="enter" aria-label="開始爬塔" disabled>開始爬塔</button></div>
+</section>
+<section id="shop" class="screen select-screen" hidden>
+<p class="eyebrow">EQUIPMENT SHOP</p>
+<h1>裝備商店</h1>
+<div class="shop-status"><span id="shopStage"></span><strong id="shopGold" aria-live="polite"></strong></div>
+<p class="intro">裝備可重複購買，效果疊加，僅在本次爬塔有效。</p>
+<div class="shop-grid" id="shopItems"></div>
+<div class="choose-footer"><span id="shopNotice" class="hint" aria-live="polite"></span><button id="leaveShop" class="primary">繼續爬塔</button></div>
 </section>
 <section id="play" class="screen play" hidden>
-<div class="tower-head"><div id="floorLabel" class="eyebrow"></div><div id="floorEnemy" class="hint"></div></div>
+<div class="tower-head"><div id="floorLabel" class="eyebrow"></div><div id="floorEnemy" class="hint"></div><strong class="gold" id="gold"></strong></div>
 <div class="hud">
 <div class="fighter" id="fighter0"><small>1P</small> <span id="name0"></span> <span id="hp0" class="hptext"></span><div class="track"><i></i></div><div id="reboundHeal" class="progress"></div></div>
 <div class="timer" id="timer">75</div>
 <div class="fighter" id="fighter1"><small>敵方</small> <span id="name1"></span> <span id="hp1" class="hptext"></span><div class="track"><i></i></div><div id="walls1" class="progress"></div></div>
 </div>
 <div class="field">
-<canvas id="arena" class="arena" width="200" height="200" tabindex="0" aria-label="十邊形競技場。按住場內選定起點，向發射方向的反方向拖曳後放開。鍵盤可用方向鍵選發射方向、加減鍵調力道、空白鍵發射。"></canvas>
+<canvas id="arena" class="arena" width="200" height="200" tabindex="0" aria-label="圓形競技場。按住場內選定起點，向發射方向的反方向拖曳後放開。鍵盤可用方向鍵選發射方向、加減鍵調力道、空白鍵發射。"></canvas>
 <div id="draft" class="draft" role="dialog" aria-modal="true" aria-labelledby="draftTitle" hidden><div>
 <div class="eyebrow" id="draftRound"></div><h2 id="draftTitle">選擇能力</h2><p id="draftInfo"></p><div class="offers" id="offers"></div>
 </div></div>
@@ -77,44 +87,31 @@ for (const [i,t] of types.entries()){
   $('roster').append(b);
 }
 let screen='home';
-function show(next){if(next!==screen&&screen==='play'){stop();drag=null;} for(const name of ['home','select','play'])$(name).hidden=name!==next;screen=next;}
+function show(next){if(next!==screen&&screen==='play'){stop();drag=null;} for(const name of ['home','select','shop','play'])$(name).hidden=name!==next;screen=next;}
 $('start').onclick=()=>{unlockSound();show('select');$('roster').firstElementChild.focus();};
 $('enter').onclick=()=>{if(!selection)return;show('play');beginRun();};
-$('back').onclick=()=>{show('select');$('roster').querySelector('[aria-pressed=true]').focus();};
+$('browseShop').onclick=()=>openShop(false);
+$('leaveShop').onclick=()=>{if(shopAccess){shopAccess=false;show('play');cv.focus({preventScroll:true});}else{show('select');$('browseShop').focus();}};
+$('back').onclick=()=>{run=newRun();shopAccess=false;show('select');$('roster').querySelector('[aria-pressed=true]').focus();};
 $('again').onclick=()=>beginRun();
 $('reset').onclick=()=>{
   if(state!=='run'||!balls[0]||balls[0].hp<=0)return;
+  run.gold=run.entryGold;
   reset(Math.min(run.entryHp,balls[0].hp));
 };
 
 const W=200,R=13,TIME=75, STEP=1/240, cv=$('arena'), ctx=cv.getContext('2d');
 const hypot=Math.hypot, clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const C=W/2, RIM_RADIUS=C-3, BASE_SPEED_GAIN=1.05, DODGE_MAX=75;
-const vertices=Array.from({length:10},(_,i)=>{
-  const a=-Math.PI/2+Math.PI/10+i*Math.PI/5;
-  return {x:C+RIM_RADIUS*Math.cos(a),y:C+RIM_RADIUS*Math.sin(a)};
-});
-const walls=vertices.map((a,i)=>{
-  const b=vertices[(i+1)%vertices.length], dx=b.x-a.x,dy=b.y-a.y,n=hypot(dx,dy);
-  const nx=dy/n,ny=-dx/n;
-  return {id:i,nx,ny,limit:(a.x-C)*nx+(a.y-C)*ny};
-});
-const wallDot=(p,w)=>(p.x-C)*w.nx+(p.y-C)*w.ny;
-function inside(p,pad=0){return walls.every(w=>wallDot(p,w)<=w.limit-pad+1e-7);}
+const randomInt=(lo,hi)=>lo+Math.floor(Math.random()*(hi-lo+1));
+function inside(p,pad=0){return hypot(p.x-C,p.y-C)<=RIM_RADIUS-pad+1e-7;}
 function inset(p,pad){
-  let k=1;
-  for(const w of walls){
-    const d=wallDot(p,w);
-    if(d>w.limit-pad)k=Math.min(k,(w.limit-pad)/d);
-  }
-  return k===1?{x:p.x,y:p.y}:{x:C+(p.x-C)*k,y:C+(p.y-C)*k};
+  const dx=p.x-C,dy=p.y-C,d=hypot(dx,dy),limit=RIM_RADIUS-pad;
+  if(d<=limit)return{x:p.x,y:p.y};
+  return{x:C+dx*limit/d,y:C+dy*limit/d};
 }
 function place(b,x,y){const p=inset({x,y},R);b.x=p.x;b.y=p.y;}
-function arenaPath(){
-  ctx.beginPath();
-  vertices.forEach(({x,y},i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
-  ctx.closePath();
-}
+function arenaPath(){ctx.beginPath();ctx.arc(C,C,RIM_RADIUS,0,Math.PI*2);ctx.closePath();}
 const reducedMotion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
 let audio=null,soundOn=true,shake=null,lastHaptic=-Infinity;
 const lastTone={wall:-Infinity,body:-Infinity,crit:-Infinity};
@@ -174,7 +171,7 @@ function impact(kind,dx,dy,power,own=true){
   osc.connect(volume);volume.connect(audio.destination);osc.start(now);osc.stop(now+length+.01);
   osc.onended=()=>{osc.disconnect();volume.disconnect();};
 }
-let balls=[], beams=[], sparks=[], floats=[], shots=[], particles=[], draftOptions=[], grip=null, contacts=new Set(), t=0, drag=null, state='idle', raf=0,last=0,acc=0,keyAim=null;
+let balls=[], beams=[], sparks=[], floats=[], shots=[], particles=[], coins=[], nextCoinAt=0, draftOptions=[], grip=null, contacts=new Set(), t=0, drag=null, state='idle', raf=0,last=0,acc=0,keyAim=null;
 const floors=[
   ['訓練層',[['dummy',8]]],
   ['基礎層',[['grunt',12]]],
@@ -192,17 +189,53 @@ const enemies={
   dummy:{id:'dummy',name:'訓練球',color:'#dedee7'},
   grunt:{id:'grunt',name:'撞擊球',color:'#ff966b'}
 };
-const newRun=()=>({floor:1,power:0,speed:0,dodge:0,equipment:{},entryHp:0,drainCharge:0});
-let run=newRun();
-const gearOrder=['blade','regen','drain','shield','mine','spike','armor','echo'];
+const newRun=()=>({floor:1,power:0,speed:0,dodge:0,gold:0,entryGold:0,hpBonus:0,equipment:{},entryHp:0,drainCharge:0});
+let run=newRun(),shopAccess=false;
+const shopPrices={armor:6,shield:8,spike:9,echo:10,mine:10,blade:12,regen:15,drain:15};
+function gearPrice(id){return shopPrices[id]+3*gearCount(id);}
+function openShop(active){
+  if(active&&state!=='idle')return;
+  shopAccess=active;show('shop');
+  $('shopNotice').textContent=active?'購買不會消耗本層的通關升級。':'此處可預覽裝備。爬塔取得金幣後即可購買。';
+  renderShop();$('leaveShop').focus();
+}
+function renderShop(){
+  $('shopStage').textContent=shopAccess?'第 '+run.floor+' 層 · 出發前整備':'選球前預覽';
+  $('shopGold').textContent=(shopAccess?run.gold:0)+' G';
+  $('leaveShop').textContent=shopAccess?'前往第 '+run.floor+' 層':'回到選球';
+  $('shopItems').replaceChildren();
+  for(const id of Object.keys(shopPrices)){
+    const item=specialGear[id]||cards.find(c=>c.id===id);
+    const price=gearPrice(id),n=shopAccess?gearCount(id):0;
+    const cell=document.createElement('article');cell.className='shop-item';
+    cell.innerHTML='<b></b><small></small><button type="button" class="secondary"></button>';
+    cell.querySelector('b').textContent=item.name+' · 已有 '+n;
+    cell.querySelector('small').textContent=item.desc;
+    const button=cell.querySelector('button');
+    button.textContent=(shopAccess&&run.gold>=price?'購買 · ':'')+price+' G';
+    button.disabled=!shopAccess||run.gold<price;
+    button.onclick=()=>{if(buyGear(id))$('leaveShop').focus();};
+    $('shopItems').append(cell);
+  }
+}
+function buyGear(id){
+  if(screen!=='shop'||!shopAccess||state!=='idle'||!Object.hasOwn(shopPrices,id))return false;
+  const price=gearPrice(id);
+  if(run.gold<price)return false;
+  run.gold-=price;run.equipment[id]=gearCount(id)+1;
+  const hp=balls[0].hp+(id==='armor'?4:0);
+  reset(hp,false);renderShop();
+  $('shopNotice').textContent='已購買 '+(specialGear[id]||cards.find(c=>c.id===id)).name+'。';
+  return true;
+}
 const REPAIR_RATE=.30, CLEAR_HEAL_RATE=.10;
 const gearCount=id=>run.equipment[id]||0;
-const persistentMaxHp=()=>selection.hp+4*gearCount('armor');
+const persistentMaxHp=()=>selection.hp+run.hpBonus+4*gearCount('armor');
 const specialGear={
   regen:{name:'再生裝置',desc:'每件使往後通關時回復最大血量的 10%。從下一層開始生效。'},
   drain:{name:'吸血核心',desc:'每件將本體撞擊實際造成傷害的 20% 轉為回血。不含副武器。'}
 };
-function beginRun(){run=newRun();reset(selection.hp);}
+function beginRun(){run=newRun();shopAccess=false;reset(selection.hp);}
 function floorSpec(n){
   if(n<=floors.length)return floors[n-1];
   const roster=floors[7+(n-11)%3][1];
@@ -211,16 +244,17 @@ function floorSpec(n){
 function make(type,x,y,team=0,id=0){
   return {id,team,type,x,y,pressure:0,vx:0,vy:0,hp:type.hp,maxHp:type.hp,up:{},shield:0,shieldWalls:0,spikeAt:0,mineWalls:0,bladeWalls:0,mines:[],echoes:[],healWalls:0,ready:0,energy:0,laserReady:new Map(),wall:null,trail:[],flash:0};
 }
-function reset(remainingHp=run.entryHp||selection.hp){
+function reset(remainingHp=run.entryHp||selection.hp,focus=true){
   shake?.cancel();shake=null;stop();closeDraft();
   const [label,list]=floorSpec(run.floor);
   balls=[make(selection,W*.25,W/2)];
   list.forEach(([id,hp],i)=>balls.push(make({...enemies[id],hp},W*.76,W*(i+1)/(list.length+1),1,i+1)));
   for(const enemy of balls.slice(1)){place(enemy,enemy.x,enemy.y);enemy.pressure=run.floor>=5?Math.floor((run.floor-2)/3):0;}
-  beams=[];sparks=[];floats=[];shots=[];particles=[];draftOptions=[];contacts=new Set();grip=null;t=0;drag=null;keyAim=null;state='idle';
+  beams=[];sparks=[];floats=[];shots=[];particles=[];coins=[];nextCoinAt=.9+Math.random()*1.6;draftOptions=[];contacts=new Set();grip=null;t=0;drag=null;keyAim=null;state='idle';
+  balls[0].maxHp+=run.hpBonus;
   for(const card of cards)for(let i=0;i<gearCount(card.id);i++)grant(balls[0],card);
   balls[0].hp=clamp(remainingHp,0,balls[0].maxHp);
-  run.entryHp=balls[0].hp;
+  run.entryHp=balls[0].hp;run.entryGold=run.gold;
   floats=[];
   pixel($('name0'),selection.name);$('fighter0').style.setProperty('--ball',selection.color);
   $('fighter1').style.setProperty('--ball',enemies[list[0][0]].color);
@@ -228,13 +262,14 @@ function reset(remainingHp=run.entryHp||selection.hp){
   $('floorEnemy').textContent=list.map(([id])=>enemies[id].name).join(' ＋ ');
   $('result').hidden=true;
   $('hint').textContent='按住場內起點，向後拉，放開發射。';
-  hud();render();cv.focus({preventScroll:true});
+  hud();render();if(focus)cv.focus({preventScroll:true});
 }
 function stop(){cancelAnimationFrame(raf);raf=0;}
 function hud(){
   const b=balls[0],others=balls.slice(1),alive=others.filter(o=>o.hp>0);
   $('timer').textContent=String(Math.max(0,Math.ceil(TIME-t))).padStart(2,'0');
   $('hp0').textContent=b.hp+'/'+b.maxHp;
+  $('gold').textContent=run.gold+' G';
   $('reboundHeal').textContent='回血 '+b.healWalls+'/5 · 閃避 '+run.dodge+'%';
   $('fighter0').querySelector('.track i').style.width=100*b.hp/b.maxHp+'%';
   const hp=others.reduce((n,o)=>n+o.hp,0),max=others.reduce((n,o)=>n+o.maxHp,0);
@@ -312,9 +347,8 @@ function chooseCard(i){
   let hp=choice.carryHp;
   if(choice.id==='repair')hp+=choice.heal;
   else if(choice.id==='dodge')run.dodge=Math.min(DODGE_MAX,run.dodge+2);
-  else if(choice.id==='gear')run.equipment[choice.gearId]=gearCount(choice.gearId)+1;
   else run[choice.id]++;
-  run.floor++;reset(hp);
+  run.floor++;run.hpBonus+=2;reset(hp,false);openShop(true);
 }
 function openDraft(options,title,info,round){
   state='reward';stop();draftOptions=options;
@@ -332,23 +366,20 @@ function openDraft(options,title,info,round){
   $('offers').firstElementChild.focus();
 }
 function offerReward(){
-  const gearId=gearOrder[(run.floor-1)%gearOrder.length];
-  const special=specialGear[gearId],equipment=special||cards.find(c=>c.id===gearId);
-  const max=persistentMaxHp(), hp=clamp(balls[0].hp,0,max);
+  const max=persistentMaxHp()+2, hp=clamp(balls[0].hp,0,max);
   const clearHeal=Math.min(max-hp,Math.round(max*CLEAR_HEAL_RATE*gearCount('regen')));
   const carryHp=hp+clearHeal,heal=Math.min(max-carryHp,Math.round(max*REPAIR_RATE));
   const options=[
     {id:'power',name:'力量',desc:'往後每層，本體碰撞傷害 +1，爆擊率 +3 個百分點（最高 100%）。'},
     {id:'speed',name:'速度',desc:'往後每層，基準球速 +8%。'},
-    {id:'gear',gearId,name:'裝備 · '+equipment.name,desc:special?equipment.desc:'往後每層開場自帶此裝備 1 層。'+equipment.desc},
     {id:'repair',heal,name:'修復包',desc:'一次性回復最大血量的 30%。'+(heal?'這次回復 '+heal+' HP。':'目前血量已滿。')},
     {id:'dodge',name:'閃避',disabled:run.dodge>=DODGE_MAX,desc:run.dodge>=DODGE_MAX?'已達 75% 上限。':'受擊時有機率不扣血。'+run.dodge+'% → '+Math.min(DODGE_MAX,run.dodge+2)+'%（最高 75%）。'}
   ].map(choice=>({...choice,carryHp}));
-  openDraft(options,'通關獎勵 · 五選一','下層帶入 '+carryHp+'/'+max+' HP'+(clearHeal?'（含再生 +'+clearHeal+'）':'')+'。','第 '+run.floor+' 層通關');
+  openDraft(options,'通關獎勵 · 四選一','最大血量 +2。下層帶入 '+carryHp+'/'+max+' HP'+(clearHeal?'（含再生 +'+clearHeal+'）':'')+'。','第 '+run.floor+' 層通關');
   $('hint').textContent='選擇一項永久強化，或現在補血。';
 }
 $('draft').addEventListener('keydown',e=>{
-  if(/^[1-5]$/.test(e.key)&&Number(e.key)<=draftOptions.length){e.preventDefault();chooseCard(Number(e.key)-1);}
+  if(/^[1-4]$/.test(e.key)&&Number(e.key)<=draftOptions.length){e.preventDefault();chooseCard(Number(e.key)-1);}
   if(e.key==='Tab'){
     const buttons=[...$('offers').children].filter(b=>!b.disabled),i=buttons.indexOf(document.activeElement);
     e.preventDefault();buttons[(i+(e.shiftKey?-1:1)+buttons.length)%buttons.length]?.focus();
@@ -366,8 +397,32 @@ function change(b,delta,selfCost=false){
   if(n<0)b.flash=t+.14;
   floats.push({x:b.x,y:b.y,start:t,label:n>0?'+'+n:String(n),color:n>0?'#dfff69':'#ff7991'});return n;
 }
+function earnGold(amount,x,y){
+  run.gold+=amount;
+  floats.push({x,y,start:t,label:'+'+amount+' G',color:'#ffd766',gold:true});
+}
+function settleEnemyDrops(){
+  for(const b of balls){
+    if(b.team!==1||b.hp>0||b.paid)continue;
+    b.paid=true;earnGold(randomInt(1,5),b.x,b.y);
+  }
+}
+function updateCoins(player){
+  if(player.hp<=0)return;
+  if(!coins.length&&t>=nextCoinAt){
+    const angle=Math.random()*Math.PI*2,radius=(RIM_RADIUS-11)*Math.sqrt(Math.random());
+    coins.push({x:C+radius*Math.cos(angle),y:C+radius*Math.sin(angle),until:t+5});
+    nextCoinAt=t+5+1.5+Math.random()*3;
+  }
+  coins=coins.filter(c=>{
+    if(t>=c.until)return false;
+    if(hypot(c.x-player.x,c.y-player.y)>R+5)return true;
+    earnGold(randomInt(1,3),c.x,c.y);
+    nextCoinAt=t+1.5+Math.random()*3;return false;
+  });
+}
 function burst(b,r){sparks.push({x:b.x,y:b.y,start:t,r,color:b.type.color});}
-function wallHit(b,side,x,y){
+function wallHit(b,x,y){
   if(b.team===0&&++b.healWalls===5){b.healWalls=0;change(b,1);}
   if(count(b,'shield')&&!b.shield&&++b.shieldWalls>=5){b.shield=3*count(b,'shield');b.shieldWalls=0;burst(b,24);}
   if(count(b,'mine')&&++b.mineWalls%3===0){
@@ -385,37 +440,34 @@ function wallHit(b,side,x,y){
   }
   if(b.type.id==='charge')b.energy=Math.min(3,b.energy+1);
   if(b.type.id!=='laser')return;
-  const point={x,y,side};
-  if(!b.wall||b.wall.side===side){b.wall=point;return;}
+  const point={x,y};
+  if(!b.wall){b.wall=point;return;}
   if(hypot(b.wall.x-x,b.wall.y-y)>1)beams.push({a:b.wall,b:point,owner:b,until:t+laserLife,touch:new Set()});
   b.wall=point;
   const own=beams.filter(l=>l.owner===b);if(own.length>laserCap)beams.splice(beams.indexOf(own[0]),1);
 }
 function move(b,dt,skills=true){
-  // Sweep the ball center against each edge offset inward by its radius.
-  // A simultaneous vertex hit is a single impact.
+  // Sweep the ball center against the circle inset by the ball radius.
+  const radius=RIM_RADIUS-R,speed2=b.vx*b.vx+b.vy*b.vy;
+  if(!speed2)return;
   let remaining=dt;
   for(let bounce=0;bounce<12&&remaining>1e-9;bounce++){
-    let time=remaining,hit=null,corner=false;
-    for(const w of walls){
-      const outward=b.vx*w.nx+b.vy*w.ny;
-      if(outward<=1e-8)continue;
-      const contact=Math.max(0,w.limit-R-wallDot(b,w))/outward;
-      if(contact<time-1e-9||(!hit&&contact<=time)){
-        time=contact;hit=w;corner=false;
-      }else if(hit&&Math.abs(time-contact)<=1e-9)corner=true;
-    }
-    b.x+=b.vx*time;b.y+=b.vy*time;
-    if(!hit)break;
-    remaining-=time;
-    const outward=b.vx*hit.nx+b.vy*hit.ny;
-    const x=b.x+hit.nx*R,y=b.y+hit.ny*R;
-    if(corner){b.vx=-b.vx;b.vy=-b.vy;}
-    else{b.vx-=2*outward*hit.nx;b.vy-=2*outward*hit.ny;}
-    place(b,b.x-hit.nx*1e-6,b.y-hit.ny*1e-6);
+    const start=inset(b,R+1e-6),dx=start.x-C,dy=start.y-C;
+    b.x=start.x;b.y=start.y;
+    const dot=dx*b.vx+dy*b.vy,gap=Math.max(0,radius*radius-dx*dx-dy*dy);
+    const root=Math.sqrt(dot*dot+speed2*gap);
+    const hit=dot>0?gap/(root+dot):(root-dot)/speed2;
+    const elapsed=Math.min(remaining,hit);
+    b.x+=b.vx*elapsed;b.y+=b.vy*elapsed;
+    if(hit>remaining)break;
+    remaining-=elapsed;
+    const nx=(b.x-C)/radius,ny=(b.y-C)/radius;
+    const outward=b.vx*nx+b.vy*ny;
+    const x=C+nx*RIM_RADIUS,y=C+ny*RIM_RADIUS;
+    b.vx-=2*outward*nx;b.vy-=2*outward*ny;
     if(skills){
-      impact('wall',-hit.nx,-hit.ny,outward,b===balls[0]);
-      wallHit(b,hit.id,x,y);
+      impact('wall',-nx,-ny,outward,b.team===0);
+      wallHit(b,x,y);
     }
   }
 }
@@ -443,7 +495,7 @@ function finish(won){
   state='end';stop();
   $('outcome').textContent='止步第 '+run.floor+' 層';
   $('reason').textContent=balls[0].hp<=0?'血量歸零。本次爬塔結束。':'時間到，敵人還沒清完。';
-  $('hint').textContent='已通過 '+(run.floor-1)+' 層 · 本次升級已結算';$('result').hidden=false;$('again').focus();
+  $('hint').textContent='已通過 '+(run.floor-1)+' 層 · 本次剩餘 '+run.gold+' G';$('result').hidden=false;$('again').focus();
 }
 function hitBurst(x,y){
   for(let i=0;i<26;i++){
@@ -569,7 +621,8 @@ function update(dt){
     if(o){change(o,-2);return false;}
     return true;
   });
-  floats=floats.filter(f=>t-f.start<(f.crit?.85:.65));sparks=sparks.filter(f=>t-f.start<.3);
+  settleEnemyDrops();updateCoins(player);
+  floats=floats.filter(f=>t-f.start<(f.crit||f.gold?.85:.65));sparks=sparks.filter(f=>t-f.start<.3);
   particles=particles.filter(f=>t-f.start<.48);
   if(Math.floor(t*40)!==Math.floor((t-dt)*40))for(const s of active){s.trail.push([s.x,s.y]);if(s.trail.length>7)s.trail.shift();}
   if(player.hp<=0)finish(false);
@@ -632,6 +685,11 @@ function render(){
     }
     endArena();return;
   }
+  for(const c of coins){
+    ctx.fillStyle='#ffce50';ctx.fillRect(Math.round(c.x)-4,Math.round(c.y)-5,8,10);
+    ctx.fillRect(Math.round(c.x)-5,Math.round(c.y)-3,10,6);
+    ctx.fillStyle='#ac650e';ctx.fillRect(Math.round(c.x)-1,Math.round(c.y)-3,2,6);
+  }
   for(const s of balls){
     if(s.hp<=0)continue;
     for(const mine of s.mines){ctx.fillStyle=s.type.color;ctx.fillRect(mine.x-5,mine.y-5,10,10);ctx.fillStyle='#fff';ctx.fillRect(mine.x-1,mine.y-1,2,2);}
@@ -651,9 +709,9 @@ function render(){
     ctx.fillRect(Math.round(p.x+p.vx*age),Math.round(p.y+p.vy*age+55*age*age),p.size,p.size);
   }
   for(const f of floats){
-    const u=(t-f.start)/(f.crit?.85:.65);ctx.globalAlpha=1-u;ctx.fillStyle=f.color;
+    const u=(t-f.start)/(f.crit||f.gold?.85:.65);ctx.globalAlpha=1-u;ctx.fillStyle=f.color;
     ctx.font=f.crit?'900 20px system-ui':f.dodge?'bold 14px system-ui':'bold 15px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
-    const {x,y}=inset({x:f.x,y:f.y-17-u*20},f.crit?22:f.dodge?17:12);
+    const {x,y}=inset({x:f.x,y:f.y-17-u*20},f.crit||f.gold?22:f.dodge?17:12);
     if(f.crit){ctx.lineWidth=4;ctx.strokeStyle='#3d1e04';ctx.strokeText(f.label,x,y);}
     ctx.fillText(f.label,x,y);
   }
