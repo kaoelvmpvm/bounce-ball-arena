@@ -17,15 +17,16 @@
 .tower-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.tower-head .eyebrow{margin:0}.tower-head .hint{font-size:12px;text-align:right}.loadouts{grid-template-columns:1fr}.loadouts span:last-child{text-align:left}.controls{flex-wrap:wrap}.result>div{padding:12px}.play{max-width:440px}
 .gold,#shopGold{color:#ffd766;white-space:nowrap;font:bold 15px monospace}.shop-status{display:flex;justify-content:space-between;gap:12px;margin-top:14px;color:var(--muted)}.shop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.shop-item{padding:12px;border:1px solid #363640;background:#131317;display:flex;flex-direction:column;gap:7px}.shop-item small{color:var(--muted);line-height:1.45;flex:1}.shop-item .gear-actions{display:grid;grid-template-columns:1fr;gap:5px}.shop-item button{text-align:left;width:100%;color:#ffd766}.shop-item b{font-size:15px}.shop-item span{color:var(--muted);font-size:12px;font-weight:400}.shop-item button:disabled{opacity:.55}
 @media(max-width:380px){.shop-item{padding:9px}.shop-item small{font-size:12px}}
+.merchant-scene{display:grid;place-items:center;padding:16px;margin-top:12px;border:1px solid #3a3242;background:radial-gradient(ellipse at 50% 100%,#292034,#0a090d 72%)}.merchant-npc{display:grid;justify-items:center;gap:8px;background:none;color:#ffdc7a;border:1px solid transparent;padding:5px 16px 8px;font-weight:700}.merchant-npc svg{width:64px;height:64px}.merchant-npc:hover{border-color:#ffdc7a}.merchant-npc[aria-expanded=true]{color:#fff}.merchant-scene+div .intro{margin:10px 0}
 </style>
 </head>
 <body>
 <main>
 <section id="home" class="screen home"><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.4.1 · COIN SHOP</p>
+<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.4.2 · MERCHANT</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
-<p class="intro">選球時可購買或配置裝備。爬塔中取得的金幣會在結算後存進錢包。</p>
+<p class="intro">選球時可購買或配置裝備。爬塔途中偶爾會遇到商人，沒花完的金幣會在結算後存進錢包。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
 <p class="hint" id="selectLoadout"></p>
 <div class="choose-footer"><strong id="selectGold" class="gold"></strong><button class="secondary" id="browseShop">裝備商店</button><button class="primary" id="enter" aria-label="開始爬塔" disabled>開始爬塔</button></div>
@@ -37,6 +38,28 @@
 <p class="intro">裝備與金幣跨局保留。購買後可在這裡選擇是否裝備，爬塔途中不能更換。</p>
 <div class="shop-grid" id="shopItems"></div>
 <div class="choose-footer"><span id="shopNotice" class="hint" aria-live="polite"></span><button id="leaveShop" class="primary">回到選球</button></div>
+</section>
+<section id="merchant" class="screen select-screen" hidden>
+<p class="eyebrow" id="merchantFloor"></p>
+<h1>旅途商人</h1>
+<div class="shop-status"><span id="merchantHp"></span><strong class="gold" id="merchantGold" aria-live="polite"></strong></div>
+<div class="merchant-scene">
+  <button class="merchant-npc" id="talkMerchant" type="button" aria-expanded="false" aria-controls="merchantTrade">
+    <svg viewBox="0 0 32 32" aria-hidden="true" shape-rendering="crispEdges">
+      <path fill="#211927" d="M8 2h16v2h3v5h3v21H2V9h3V4h3z"/>
+      <path fill="#a761c5" d="M9 4h14v2h3v5h2v17H4V11h2V6h3z"/>
+      <path fill="#c990e0" d="M9 6h14v3h3v2H6V9h3z"/>
+      <path fill="#352334" d="M9 12h14v2h2v8h-3v2H10v-2H7v-8h2z"/>
+      <path fill="#ffdc7a" d="M11 16h3v3h-3zm7 0h3v3h-3zM14 25h4v4h-4z"/>
+    </svg>
+    <span>與商人交談</span>
+  </button>
+</div>
+<div id="merchantTrade" hidden>
+  <p class="intro">以本趟金幣交易。這裡買到的升級和裝備只在本趟有效。</p>
+  <div class="shop-grid" id="merchantItems"></div>
+</div>
+<div class="choose-footer"><span id="merchantNotice" class="hint" aria-live="polite"></span><button id="leaveMerchant" class="primary" type="button">繼續爬塔</button></div>
 </section>
 <section id="play" class="screen play" hidden>
 <div class="tower-head"><div id="floorLabel" class="eyebrow"></div><div id="floorEnemy" class="hint"></div><strong class="gold" id="gold"></strong></div>
@@ -88,7 +111,7 @@ for (const [i,t] of types.entries()){
   $('roster').append(b);
 }
 let screen='home';
-function show(next){if(next!==screen&&screen==='play'){stop();drag=null;} if(next==='select')renderSelection();for(const name of ['home','select','shop','play'])$(name).hidden=name!==next;screen=next;}
+function show(next){if(next!==screen&&screen==='play'){stop();drag=null;} if(next==='select')renderSelection();for(const name of ['home','select','shop','merchant','play'])$(name).hidden=name!==next;screen=next;}
 $('start').onclick=()=>{unlockSound();show('select');$('roster').firstElementChild.focus();};
 $('enter').onclick=()=>{if(!selection)return;show('play');beginRun();};
 $('browseShop').onclick=()=>openShop();
@@ -99,6 +122,13 @@ function leaveRun(){
 }
 $('back').onclick=leaveRun;
 $('again').onclick=leaveRun;
+$('talkMerchant').onclick=()=>{
+  if(screen!=='merchant'||state!=='merchant')return;
+  const trade=$('merchantTrade'),opening=trade.hidden;
+  trade.hidden=!opening;$('talkMerchant').setAttribute('aria-expanded',String(opening));
+  if(opening)renderMerchant();
+};
+$('leaveMerchant').onclick=leaveMerchant;
 $('reset').onclick=()=>{
   if(state!=='run'||!balls[0]||balls[0].hp<=0)return;
   run.gold=run.entryGold;
@@ -194,7 +224,7 @@ const enemies={
   dummy:{id:'dummy',name:'訓練球',color:'#dedee7'},
   grunt:{id:'grunt',name:'撞擊球',color:'#ff966b'}
 };
-const newRun=()=>({floor:1,power:0,speed:0,dodge:0,gold:0,entryGold:0,hpBonus:0,equipment:{},settled:false,entryHp:0,drainCharge:0});
+const newRun=()=>({floor:1,power:0,speed:0,dodge:0,gold:0,entryGold:0,hpBonus:0,equipment:{},settled:false,entryHp:0,drainCharge:0,nextMerchant:randomInt(5,10),merchantsPassed:0,merchant:null});
 let run=newRun();
 const shopPrices={armor:100,shield:105,spike:105,echo:110,mine:110,blade:115,regen:125,drain:125};
 const SHOP_SAVE_KEY='bounce-arena-equipment-v1';
@@ -298,7 +328,7 @@ function make(type,x,y,team=0,id=0){
 }
 function reset(remainingHp=run.entryHp||selection.hp,focus=true){
   shake?.cancel();shake=null;stop();closeDraft();
-  const [label,list]=floorSpec(run.floor);
+  const [label,list]=floorSpec(run.floor-run.merchantsPassed);
   balls=[make(selection,W*.25,W/2)];
   list.forEach(([id,hp],i)=>balls.push(make({...enemies[id],hp},W*.76,W*(i+1)/(list.length+1),1,i+1)));
   for(const enemy of balls.slice(1)){place(enemy,enemy.x,enemy.y);enemy.pressure=run.floor>=5?Math.floor((run.floor-2)/3):0;}
@@ -400,7 +430,68 @@ function chooseCard(i){
   if(choice.id==='repair')hp+=choice.heal;
   else if(choice.id==='dodge')run.dodge=Math.min(DODGE_MAX,run.dodge+2);
   else run[choice.id]++;
-  run.floor++;run.hpBonus+=2;reset(hp);
+  run.hpBonus+=2;advanceFloor(hp);
+}
+function advanceFloor(hp){
+  run.floor++;
+  if(run.floor===run.nextMerchant){enterMerchant(hp);return;}
+  reset(hp);
+}
+function enterMerchant(hp){
+  stop();closeDraft();state='merchant';
+  const gearIds=Object.keys(shopPrices),gearId=gearIds[randomInt(0,gearIds.length-1)],level=randomInt(1,3);
+  run.merchant={hp,gearId,level,sold:new Set()};
+  $('merchantFloor').textContent='第 '+run.floor+' 層 · MERCHANT';
+  $('merchantTrade').hidden=true;$('talkMerchant').setAttribute('aria-expanded','false');
+  $('merchantItems').replaceChildren();$('merchantNotice').textContent='休息層 · 沒有敵人，也可以不買直接離開。';
+  show('merchant');renderMerchantStatus();$('talkMerchant').focus();
+}
+function renderMerchantStatus(){
+  $('merchantHp').textContent='血量 '+run.merchant.hp+' / '+persistentMaxHp();
+  $('merchantGold').textContent=run.gold+' G';
+  $('leaveMerchant').textContent='前往第 '+(run.floor+1)+' 層';
+}
+function merchantOffers(){
+  const m=run.merchant,heal=Math.min(persistentMaxHp()-m.hp,Math.round(persistentMaxHp()*.35));
+  return [
+    {id:'power',name:'力量 +1',desc:'本體碰撞傷害 +1，爆擊率 +3 個百分點。',price:10},
+    {id:'speed',name:'速度 +1',desc:'基準球速 +8%。',price:8},
+    {id:'dodge',name:'閃避 +2%',desc:run.dodge>=DODGE_MAX?'已達 75% 上限。':'受擊時有機率不扣血，最高 75%。',price:8,disabled:run.dodge>=DODGE_MAX},
+    {id:'heal',name:'旅途治療',desc:heal?'回復 '+heal+' HP（最多為最大血量的 35%）。':'目前已滿血。',price:7,heal,disabled:heal<=0},
+    {id:'gear',name:itemFor(m.gearId).name+' · Lv.'+m.level,desc:'隨機裝備。立刻附加 '+m.level+' 級，與已有等級疊加。'+itemFor(m.gearId).desc,price:5+4*m.level}
+  ];
+}
+function renderMerchant(){
+  renderMerchantStatus();$('merchantItems').replaceChildren();
+  for(const o of merchantOffers()){
+    const cell=document.createElement('article');cell.className='shop-item';
+    cell.innerHTML='<b></b><small></small><button type="button" class="secondary"></button>';
+    cell.querySelector('b').textContent=o.name;cell.querySelector('small').textContent=o.desc;
+    const b=cell.querySelector('button'),sold=run.merchant.sold.has(o.id);
+    b.disabled=sold||o.disabled||run.gold<o.price;b.textContent=sold?'已售出':o.price+' G · 購買';
+    b.onclick=()=>{if(buyMerchant(o.id))$('leaveMerchant').focus();};
+    $('merchantItems').append(cell);
+  }
+}
+function buyMerchant(id){
+  if(screen!=='merchant'||state!=='merchant'||$('merchantTrade').hidden||!run.merchant||run.merchant.sold.has(id))return false;
+  const o=merchantOffers().find(item=>item.id===id),m=run.merchant;
+  if(!o||o.disabled||run.gold<o.price)return false;
+  run.gold-=o.price;m.sold.add(id);
+  if(id==='heal')m.hp+=o.heal;
+  else if(id==='gear'){
+    run.equipment[m.gearId]=gearCount(m.gearId)+m.level;
+    if(m.gearId==='armor')m.hp+=4*m.level;
+  }else if(id==='dodge')run.dodge=Math.min(DODGE_MAX,run.dodge+2);
+  else run[id]++;
+  renderMerchant();$('merchantNotice').textContent='已購買 '+o.name+'。';
+  return true;
+}
+function leaveMerchant(){
+  if(screen!=='merchant'||state!=='merchant'||!run.merchant)return;
+  const hp=run.merchant.hp;
+  run.merchant=null;run.merchantsPassed++;run.nextMerchant=run.floor+randomInt(5,10);
+  run.hpBonus+=2;run.floor++;show('play');reset(hp);
 }
 function openDraft(options,title,info,round){
   state='reward';stop();draftOptions=options;
