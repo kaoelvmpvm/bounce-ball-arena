@@ -15,7 +15,7 @@
 .progress{font:700 10px monospace;color:var(--muted);margin-top:5px;letter-spacing:.08em}.progress.ready{color:var(--accent)}.loadouts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;font-size:11px;color:var(--muted);line-height:1.5}.loadouts span:last-child{text-align:right}
 .draft{position:absolute;inset:2px;z-index:2;display:grid;align-items:center;overflow:auto;background:#08090dec;padding:12px}.draft h2{margin:3px 0 5px;font-size:clamp(19px,4vw,31px);color:var(--accent)}.draft p{margin:0 0 9px;color:var(--muted);font-size:12px}.offers{display:grid;gap:5px}.offer{display:grid;grid-template-columns:26px 1fr;gap:6px;text-align:left;align-items:center;border:1px solid #545563;background:#181920;color:#fff;padding:5px 8px;min-height:46px}.offer:hover,.offer:focus-visible{border-color:var(--accent);background:#262b16}.offer kbd{font:bold 13px monospace;color:var(--accent);text-align:center}.offer b{display:block;font-size:14px}.offer small{display:block;color:#c4c4cf;font-size:11px;line-height:1.35}
 .tower-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.tower-head .eyebrow{margin:0}.tower-head .hint{font-size:12px;text-align:right}.loadouts{grid-template-columns:1fr}.loadouts span:last-child{text-align:left}.controls{flex-wrap:wrap}.result>div{padding:12px}.play{max-width:440px}
-.gold,#shopGold{color:#ffd766;white-space:nowrap;font:bold 15px monospace}.shop-status{display:flex;justify-content:space-between;gap:12px;margin-top:14px;color:var(--muted)}.shop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.shop-item{padding:12px;border:1px solid #363640;background:#131317;display:flex;flex-direction:column;gap:7px}.shop-item small{color:var(--muted);line-height:1.45;flex:1}.shop-item button{text-align:left;width:100%;color:#ffd766}.shop-item b{font-size:15px}.shop-item span{color:var(--muted);font-size:12px;font-weight:400}.shop-item button:disabled{opacity:.55}
+.gold,#shopGold{color:#ffd766;white-space:nowrap;font:bold 15px monospace}.shop-status{display:flex;justify-content:space-between;gap:12px;margin-top:14px;color:var(--muted)}.shop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.shop-item{padding:12px;border:1px solid #363640;background:#131317;display:flex;flex-direction:column;gap:7px}.shop-item small{color:var(--muted);line-height:1.45;flex:1}.shop-item .gear-actions{display:grid;grid-template-columns:1fr;gap:5px}.shop-item button{text-align:left;width:100%;color:#ffd766}.shop-item b{font-size:15px}.shop-item span{color:var(--muted);font-size:12px;font-weight:400}.shop-item button:disabled{opacity:.55}
 @media(max-width:380px){.shop-item{padding:9px}.shop-item small{font-size:12px}}
 </style>
 </head>
@@ -23,19 +23,20 @@
 <main>
 <section id="home" class="screen home"><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.4 · COIN SHOP</p>
+<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.4.1 · COIN SHOP</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
-<p class="intro">選一顆球開始爬塔。擊倒敵人或在場內撿金幣，即可在樓層之間購買裝備。</p>
+<p class="intro">選球時可購買或配置裝備。爬塔中取得的金幣會在結算後存進錢包。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
-<div class="choose-footer"><span class="hint">TOWER MODE · 從第 1 層開始</span><button class="secondary" id="browseShop">裝備商店</button><button class="primary" id="enter" aria-label="開始爬塔" disabled>開始爬塔</button></div>
+<p class="hint" id="selectLoadout"></p>
+<div class="choose-footer"><strong id="selectGold" class="gold"></strong><button class="secondary" id="browseShop">裝備商店</button><button class="primary" id="enter" aria-label="開始爬塔" disabled>開始爬塔</button></div>
 </section>
 <section id="shop" class="screen select-screen" hidden>
 <p class="eyebrow">EQUIPMENT SHOP</p>
 <h1>裝備商店</h1>
 <div class="shop-status"><span id="shopStage"></span><strong id="shopGold" aria-live="polite"></strong></div>
-<p class="intro">裝備可重複購買，效果疊加，僅在本次爬塔有效。</p>
+<p class="intro">裝備與金幣跨局保留。購買後可在這裡選擇是否裝備，爬塔途中不能更換。</p>
 <div class="shop-grid" id="shopItems"></div>
-<div class="choose-footer"><span id="shopNotice" class="hint" aria-live="polite"></span><button id="leaveShop" class="primary">繼續爬塔</button></div>
+<div class="choose-footer"><span id="shopNotice" class="hint" aria-live="polite"></span><button id="leaveShop" class="primary">回到選球</button></div>
 </section>
 <section id="play" class="screen play" hidden>
 <div class="tower-head"><div id="floorLabel" class="eyebrow"></div><div id="floorEnemy" class="hint"></div><strong class="gold" id="gold"></strong></div>
@@ -49,10 +50,10 @@
 <div id="draft" class="draft" role="dialog" aria-modal="true" aria-labelledby="draftTitle" hidden><div>
 <div class="eyebrow" id="draftRound"></div><h2 id="draftTitle">選擇能力</h2><p id="draftInfo"></p><div class="offers" id="offers"></div>
 </div></div>
-<div class="result" id="result" hidden><div><h2 id="outcome"></h2><p id="reason"></p><button id="again" class="primary">從第 1 層重來</button></div></div>
+<div class="result" id="result" hidden><div><h2 id="outcome"></h2><p id="reason"></p><button id="again" class="primary">回選球與裝備</button></div></div>
 </div>
 <div class="loadouts"><span id="loadout0"></span><span id="loadout1"></span></div>
-<div class="controls"><span id="hint" class="hint" aria-live="polite"></span><div><button id="sound" class="secondary" type="button" aria-label="碰撞音效" aria-pressed="true">音效開</button><button id="reset" class="secondary">重打本層</button><button id="back" class="secondary">換球</button></div></div>
+<div class="controls"><span id="hint" class="hint" aria-live="polite"></span><div><button id="sound" class="secondary" type="button" aria-label="碰撞音效" aria-pressed="true">音效開</button><button id="reset" class="secondary">重打本層</button><button id="back" class="secondary">結束爬塔</button></div></div>
 </section>
 </main>
 <script>
@@ -87,13 +88,17 @@ for (const [i,t] of types.entries()){
   $('roster').append(b);
 }
 let screen='home';
-function show(next){if(next!==screen&&screen==='play'){stop();drag=null;} for(const name of ['home','select','shop','play'])$(name).hidden=name!==next;screen=next;}
+function show(next){if(next!==screen&&screen==='play'){stop();drag=null;} if(next==='select')renderSelection();for(const name of ['home','select','shop','play'])$(name).hidden=name!==next;screen=next;}
 $('start').onclick=()=>{unlockSound();show('select');$('roster').firstElementChild.focus();};
 $('enter').onclick=()=>{if(!selection)return;show('play');beginRun();};
-$('browseShop').onclick=()=>openShop(false);
-$('leaveShop').onclick=()=>{if(shopAccess){shopAccess=false;show('play');cv.focus({preventScroll:true});}else{show('select');$('browseShop').focus();}};
-$('back').onclick=()=>{run=newRun();shopAccess=false;show('select');$('roster').querySelector('[aria-pressed=true]').focus();};
-$('again').onclick=()=>beginRun();
+$('browseShop').onclick=()=>openShop();
+$('leaveShop').onclick=()=>{show('select');$('browseShop').focus();};
+function leaveRun(){
+  if(state!=='end')bankRun(run.gold);
+  run=newRun();show('select');$('roster').querySelector('[aria-pressed=true]')?.focus();
+}
+$('back').onclick=leaveRun;
+$('again').onclick=leaveRun;
 $('reset').onclick=()=>{
   if(state!=='run'||!balls[0]||balls[0].hp<=0)return;
   run.gold=run.entryGold;
@@ -189,53 +194,100 @@ const enemies={
   dummy:{id:'dummy',name:'訓練球',color:'#dedee7'},
   grunt:{id:'grunt',name:'撞擊球',color:'#ff966b'}
 };
-const newRun=()=>({floor:1,power:0,speed:0,dodge:0,gold:0,entryGold:0,hpBonus:0,equipment:{},entryHp:0,drainCharge:0});
-let run=newRun(),shopAccess=false;
-const shopPrices={armor:6,shield:8,spike:9,echo:10,mine:10,blade:12,regen:15,drain:15};
-function gearPrice(id){return shopPrices[id]+3*gearCount(id);}
-function openShop(active){
-  if(active&&state!=='idle')return;
-  shopAccess=active;show('shop');
-  $('shopNotice').textContent=active?'購買不會消耗本層的通關升級。':'此處可預覽裝備。爬塔取得金幣後即可購買。';
+const newRun=()=>({floor:1,power:0,speed:0,dodge:0,gold:0,entryGold:0,hpBonus:0,equipment:{},settled:false,entryHp:0,drainCharge:0});
+let run=newRun();
+const shopPrices={armor:100,shield:105,spike:105,echo:110,mine:110,blade:115,regen:125,drain:125};
+const SHOP_SAVE_KEY='bounce-arena-equipment-v1';
+const freshProfile=()=>({gold:0,levels:{},equipped:{}});
+function loadProfile(){
+  const value=freshProfile();
+  try{
+    const saved=JSON.parse(globalThis.localStorage?.getItem(SHOP_SAVE_KEY)||'null');
+    if(!saved)return value;
+    if(Number.isSafeInteger(saved.gold)&&saved.gold>=0)value.gold=saved.gold;
+    for(const id of Object.keys(shopPrices)){
+      const level=saved.levels?.[id];
+      if(Number.isSafeInteger(level)&&level>0){
+        value.levels[id]=level;value.equipped[id]=saved.equipped?.[id]!==false;
+      }
+    }
+  }catch{}
+  return value;
+}
+const profile=loadProfile();
+function saveProfile(){try{globalThis.localStorage?.setItem(SHOP_SAVE_KEY,JSON.stringify(profile));}catch{}}
+function bankRun(amount){
+  if(run.settled)return;
+  run.settled=true;profile.gold+=amount;saveProfile();
+}
+const itemFor=id=>specialGear[id]||cards.find(c=>c.id===id);
+function gearPrice(id){
+  return Math.ceil(shopPrices[id]*Math.pow(1.5,profile.levels[id]||0));
+}
+function renderSelection(){
+  $('selectGold').textContent=profile.gold+' G';
+  const names=Object.keys(shopPrices).filter(id=>profile.levels[id]&&profile.equipped[id]).map(id=>itemFor(id).name+' Lv.'+profile.levels[id]);
+  $('selectLoadout').textContent=names.length?'已裝備 · '+names.join('／'):'尚未配置裝備';
+}
+function openShop(){
+  if(screen!=='select')return;
+  show('shop');$('shopNotice').textContent='同一件裝備每升一級，下一級價格約為前一級的 1.5 倍。';
   renderShop();$('leaveShop').focus();
 }
-function renderShop(){
-  $('shopStage').textContent=shopAccess?'第 '+run.floor+' 層 · 出發前整備':'選球前預覽';
-  $('shopGold').textContent=(shopAccess?run.gold:0)+' G';
-  $('leaveShop').textContent=shopAccess?'前往第 '+run.floor+' 層':'回到選球';
+function renderShop(focusId,focusToggle=false){
+  $('shopStage').textContent='出發前整備';
+  $('shopGold').textContent=profile.gold+' G';
   $('shopItems').replaceChildren();
+  let restore=null;
   for(const id of Object.keys(shopPrices)){
-    const item=specialGear[id]||cards.find(c=>c.id===id);
-    const price=gearPrice(id),n=shopAccess?gearCount(id):0;
+    const item=itemFor(id),n=profile.levels[id]||0,price=gearPrice(id),enabled=Boolean(profile.equipped[id]);
     const cell=document.createElement('article');cell.className='shop-item';
-    cell.innerHTML='<b></b><small></small><button type="button" class="secondary"></button>';
-    cell.querySelector('b').textContent=item.name+' · 已有 '+n;
+    cell.innerHTML='<b></b><small></small><div class="gear-actions"></div>';
+    cell.querySelector('b').textContent=item.name+' · '+(n?'Lv.'+n:'未購買');
     cell.querySelector('small').textContent=item.desc;
-    const button=cell.querySelector('button');
-    button.textContent=(shopAccess&&run.gold>=price?'購買 · ':'')+price+' G';
-    button.disabled=!shopAccess||run.gold<price;
-    button.onclick=()=>{if(buyGear(id))$('leaveShop').focus();};
+    const actions=cell.querySelector('.gear-actions');
+    const buy=document.createElement('button');buy.type='button';buy.className='secondary';
+    buy.textContent=(n?'升級':'購買')+' · '+price+' G';
+    buy.disabled=profile.gold<price;buy.onclick=()=>buyGear(id);actions.append(buy);
+    if(id===focusId&&!buy.disabled)restore=buy;
+    if(n){
+      const toggle=document.createElement('button');toggle.type='button';toggle.className='secondary';
+      toggle.textContent=enabled?'已裝備 · 點擊卸下':'未裝備 · 點擊裝上';
+      toggle.setAttribute('aria-pressed',String(enabled));
+      toggle.onclick=()=>toggleGear(id);actions.append(toggle);
+      if(id===focusId&&(focusToggle||!restore))restore=toggle;
+    }
     $('shopItems').append(cell);
   }
+  restore?.focus();
 }
 function buyGear(id){
-  if(screen!=='shop'||!shopAccess||state!=='idle'||!Object.hasOwn(shopPrices,id))return false;
+  if(screen!=='shop'||!Object.hasOwn(shopPrices,id))return false;
   const price=gearPrice(id);
-  if(run.gold<price)return false;
-  run.gold-=price;run.equipment[id]=gearCount(id)+1;
-  const hp=balls[0].hp+(id==='armor'?4:0);
-  reset(hp,false);renderShop();
-  $('shopNotice').textContent='已購買 '+(specialGear[id]||cards.find(c=>c.id===id)).name+'。';
+  if(profile.gold<price)return false;
+  profile.gold-=price;profile.levels[id]=(profile.levels[id]||0)+1;
+  if(profile.levels[id]===1)profile.equipped[id]=true;
+  saveProfile();renderShop(id);
+  $('shopNotice').textContent=itemFor(id).name+'已提升至 Lv.'+profile.levels[id]+'。';
   return true;
+}
+function toggleGear(id){
+  if(screen!=='shop'||!Object.hasOwn(shopPrices,id)||!profile.levels[id])return;
+  profile.equipped[id]=!profile.equipped[id];
+  saveProfile();renderShop(id,true);
 }
 const REPAIR_RATE=.30, CLEAR_HEAL_RATE=.10;
 const gearCount=id=>run.equipment[id]||0;
 const persistentMaxHp=()=>selection.hp+run.hpBonus+4*gearCount('armor');
 const specialGear={
-  regen:{name:'再生裝置',desc:'每件使往後通關時回復最大血量的 10%。從下一層開始生效。'},
-  drain:{name:'吸血核心',desc:'每件將本體撞擊實際造成傷害的 20% 轉為回血。不含副武器。'}
+  regen:{name:'再生裝置',desc:'每級使通關時回復最大血量的 10%。'},
+  drain:{name:'吸血核心',desc:'每級將本體撞擊實際造成傷害的 20% 轉為回血。不含副武器。'}
 };
-function beginRun(){run=newRun();shopAccess=false;reset(selection.hp);}
+function beginRun(){
+  run=newRun();
+  for(const id of Object.keys(shopPrices))if(profile.equipped[id]&&profile.levels[id])run.equipment[id]=profile.levels[id];
+  reset(persistentMaxHp());
+}
 function floorSpec(n){
   if(n<=floors.length)return floors[n-1];
   const roster=floors[7+(n-11)%3][1];
@@ -348,7 +400,7 @@ function chooseCard(i){
   if(choice.id==='repair')hp+=choice.heal;
   else if(choice.id==='dodge')run.dodge=Math.min(DODGE_MAX,run.dodge+2);
   else run[choice.id]++;
-  run.floor++;run.hpBonus+=2;reset(hp,false);openShop(true);
+  run.floor++;run.hpBonus+=2;reset(hp);
 }
 function openDraft(options,title,info,round){
   state='reward';stop();draftOptions=options;
@@ -492,10 +544,10 @@ function distLine(p,l){const dx=l.b.x-l.a.x,dy=l.b.y-l.a.y;
 }
 function finish(won){
   if(won){offerReward();return;}
-  state='end';stop();
+  state='end';stop();bankRun(run.gold);
   $('outcome').textContent='止步第 '+run.floor+' 層';
   $('reason').textContent=balls[0].hp<=0?'血量歸零。本次爬塔結束。':'時間到，敵人還沒清完。';
-  $('hint').textContent='已通過 '+(run.floor-1)+' 層 · 本次剩餘 '+run.gold+' G';$('result').hidden=false;$('again').focus();
+  $('hint').textContent='已通過 '+(run.floor-1)+' 層 · 本次帶回 '+run.gold+' G';$('result').hidden=false;$('again').focus();
 }
 function hitBurst(x,y){
   for(let i=0;i<26;i++){
