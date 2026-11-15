@@ -18,13 +18,14 @@
 .gold,#shopGold{color:#ffd766;white-space:nowrap;font:bold 15px monospace}.shop-status{display:flex;justify-content:space-between;gap:12px;margin-top:14px;color:var(--muted)}.shop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.shop-item{padding:12px;border:1px solid #363640;background:#131317;display:flex;flex-direction:column;gap:7px}.shop-item small{color:var(--muted);line-height:1.45;flex:1}.shop-item .gear-actions{display:grid;grid-template-columns:1fr;gap:5px}.shop-item button{text-align:left;width:100%;color:#ffd766}.shop-item b{font-size:15px}.shop-item span{color:var(--muted);font-size:12px;font-weight:400}.shop-item button:disabled{opacity:.55}
 @media(max-width:380px){.shop-item{padding:9px}.shop-item small{font-size:12px}}
 .merchant-scene{display:grid;place-items:center;padding:16px;margin-top:12px;border:1px solid #3a3242;background:radial-gradient(ellipse at 50% 100%,#292034,#0a090d 72%)}.merchant-npc{display:grid;justify-items:center;gap:8px;background:none;color:#ffdc7a;border:1px solid transparent;padding:5px 16px 8px;font-weight:700}.merchant-npc svg{width:64px;height:64px}.merchant-npc:hover{border-color:#ffdc7a}.merchant-npc[aria-expanded=true]{color:#fff}.merchant-scene+div .intro{margin:10px 0}
+.merchant-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0 12px}.merchant-toolbar button{color:#ffd766;border-color:#806c37}.shop-item.lucky{border-color:#f0ca58;background:#272013;box-shadow:inset 0 0 14px #f0ca581a}.shop-item .lucky-badge{font-weight:800;color:#ffde71;margin-inline-start:6px;display:inline-block}
 </style>
 </head>
 <body>
 <main>
 <section id="home" class="screen home"><button class="primary" id="start" aria-label="開始遊戲"><span data-pixel="開始遊戲"></span></button></section>
 <section id="select" class="screen select-screen" hidden>
-<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.4.3 · MERCHANT</p>
+<p class="eyebrow"><span data-pixel="BOUNCE BALL ARENA"></span> / V0.4.4 · LUCKY MERCHANT</p>
 <h1><span data-pixel="選擇你的球"></span></h1>
 <p class="intro">選球時可購買或配置裝備。爬塔途中偶爾會遇到商人，沒花完的金幣會在結算後存進錢包。</p>
 <div id="roster" class="roster" role="group" aria-label="你的球"></div>
@@ -56,7 +57,8 @@
   </button>
 </div>
 <div id="merchantTrade" hidden>
-  <p class="intro">可用本趟金幣重複購買。升級與裝備只在本趟有效。</p>
+  <p class="intro">力量、速度、閃避買下後會重骰該項報價。升級與裝備只在本趟有效。</p>
+  <div class="merchant-toolbar"><button id="rerollMerchant" class="secondary" type="button">全店重骰 · 1 G</button><span class="hint" id="merchantRollCount"></span></div>
   <div class="shop-grid" id="merchantItems"></div>
 </div>
 <div class="choose-footer"><span id="merchantNotice" class="hint" aria-live="polite"></span><button id="leaveMerchant" class="primary" type="button">繼續爬塔</button></div>
@@ -129,6 +131,7 @@ $('talkMerchant').onclick=()=>{
   if(opening)renderMerchant();
 };
 $('leaveMerchant').onclick=leaveMerchant;
+$('rerollMerchant').onclick=rerollMerchant;
 $('reset').onclick=()=>{
   if(state!=='run'||!balls[0]||balls[0].hp<=0)return;
   run.gold=run.entryGold;
@@ -439,8 +442,7 @@ function advanceFloor(hp){
 }
 function enterMerchant(hp){
   stop();closeDraft();state='merchant';
-  const gearIds=Object.keys(shopPrices),gearId=gearIds[randomInt(0,gearIds.length-1)],level=randomInt(1,3);
-  run.merchant={hp,gearId,level,bought:{}};
+  run.merchant={hp,bought:{},rerolls:0,stock:rollMerchantStock()};
   $('merchantFloor').textContent='第 '+run.floor+' 層 · MERCHANT';
   $('merchantTrade').hidden=true;$('talkMerchant').setAttribute('aria-expanded','false');
   $('merchantItems').replaceChildren();$('merchantNotice').textContent='休息層 · 沒有敵人，也可以不買直接離開。';
@@ -451,23 +453,63 @@ function renderMerchantStatus(){
   $('merchantGold').textContent=run.gold+' G';
   $('leaveMerchant').textContent='前往第 '+(run.floor+1)+' 層';
 }
+const merchantStatPrices={
+  power:[[12,22],[19,31],[26,41]],
+  speed:[[10,19],[16,27],[22,35]],
+  dodge:[[10,19],[16,27],[22,35]]
+};
+const merchantStatNames={power:'力量',speed:'速度',dodge:'閃避'};
+function rollMerchantStat(id){
+  const draw=Math.random(),level=draw<.45?1:draw<.80?2:3;
+  const lucky=level===3&&Math.random()<.18;
+  const [min,max]=lucky?merchantStatPrices[id][0]:merchantStatPrices[id][level-1];
+  return {level,price:randomInt(min,max),lucky};
+}
+function rollMerchantStock(){
+  const gearIds=Object.keys(shopPrices),gearId=gearIds[randomInt(0,gearIds.length-1)],level=randomInt(1,3);
+  return {
+    power:rollMerchantStat('power'),speed:rollMerchantStat('speed'),dodge:rollMerchantStat('dodge'),
+    heal:{percent:randomInt(25,40),price:randomInt(9,15)},
+    gear:{gearId,level,price:randomInt(6+7*level,12+7*level)}
+  };
+}
 function merchantOffers(){
-  const m=run.merchant,heal=Math.min(persistentMaxHp()-m.hp,Math.round(persistentMaxHp()*.35));
+  const m=run.merchant,{power,speed,dodge,heal:medicine,gear}=m.stock;
+  const max=persistentMaxHp(),heal=Math.min(max-m.hp,Math.round(max*medicine.percent/100));
+  const dodgeGain=Math.max(0,Math.min(2*dodge.level,DODGE_MAX-run.dodge));
+  const stat=(id,quote,desc,disabled=false)=>({id,...quote,name:merchantStatNames[id]+' · Lv.'+quote.level,desc,disabled});
   return [
-    {id:'power',name:'力量 +1',desc:'本體碰撞傷害 +1，爆擊率 +3 個百分點。',price:18},
-    {id:'speed',name:'速度 +1',desc:'基準球速 +8%。',price:15},
-    {id:'dodge',name:'閃避 +'+Math.max(0,Math.min(2,DODGE_MAX-run.dodge))+'%',desc:run.dodge>=DODGE_MAX?'已達 75% 上限。':'受擊時有機率不扣血，最高 75%。',price:15,disabled:run.dodge>=DODGE_MAX},
-    {id:'heal',name:'旅途治療',desc:heal?'回復 '+heal+' HP（最多為最大血量的 35%）。':'目前已滿血。',price:12,heal,disabled:heal<=0},
-    {id:'gear',name:itemFor(m.gearId).name+' · Lv.'+m.level,desc:'隨機裝備。立刻附加 '+m.level+' 級，與已有等級疊加。'+itemFor(m.gearId).desc,price:8+7*m.level}
+    stat('power',power,'本體碰撞傷害 +'+power.level+'，爆擊率 +'+(3*power.level)+' 個百分點。'),
+    stat('speed',speed,'基準球速 +'+(8*speed.level)+'%。'),
+    stat('dodge',dodge,dodgeGain?'閃避率 +'+dodgeGain+' 個百分點，最高 75%。':'已達 75% 上限。',!dodgeGain),
+    {id:'heal',name:'旅途治療 · '+medicine.percent+'%',desc:heal?'這次回復 '+heal+' HP。':'目前已滿血。',price:medicine.price,heal,disabled:heal<=0},
+    {id:'gear',...gear,name:itemFor(gear.gearId).name+' · Lv.'+gear.level,desc:'立刻附加 '+gear.level+' 級，與已有等級疊加。'+itemFor(gear.gearId).desc}
   ];
+}
+function canTrade(){
+  return screen==='merchant'&&state==='merchant'&&Boolean(run.merchant)&&!$('merchantTrade').hidden;
+}
+function rerollMerchant(){
+  if(!canTrade()||run.gold<1)return false;
+  run.gold--;run.merchant.rerolls++;run.merchant.stock=rollMerchantStock();
+  renderMerchant('reroll');
+  $('merchantNotice').textContent='花費 1 G，全店商品與報價已重骰。';
+  return true;
 }
 function renderMerchant(focusId){
   renderMerchantStatus();$('merchantItems').replaceChildren();
-  let focus=null;
+  $('merchantRollCount').textContent='已重骰 '+run.merchant.rerolls+' 次';
+  $('rerollMerchant').disabled=run.gold<1;
+  let focus=focusId==='reroll'&&!$('rerollMerchant').disabled?$('rerollMerchant'):null;
   for(const o of merchantOffers()){
     const cell=document.createElement('article');cell.className='shop-item';
     cell.innerHTML='<b></b><small></small><button type="button" class="secondary"></button>';
-    cell.querySelector('b').textContent=o.name;cell.querySelector('small').textContent=o.desc;
+    const title=cell.querySelector('b');
+    title.textContent=o.name;cell.querySelector('small').textContent=o.desc;
+    if(o.lucky){
+      cell.className+=' lucky';
+      const badge=document.createElement('span');badge.className='lucky-badge';badge.textContent='★ 幸運特價';title.append(badge);
+    }
     const b=cell.querySelector('button'),n=run.merchant.bought[o.id]||0;
     b.disabled=Boolean(o.disabled)||run.gold<o.price;
     b.textContent=o.price+' G · '+(n?'再買（已買 '+n+' 次）':'購買');
@@ -478,17 +520,22 @@ function renderMerchant(focusId){
   if(focusId)(focus||$('leaveMerchant')).focus();
 }
 function buyMerchant(id){
-  if(screen!=='merchant'||state!=='merchant'||$('merchantTrade').hidden||!run.merchant)return false;
+  if(!canTrade())return false;
   const o=merchantOffers().find(item=>item.id===id),m=run.merchant;
   if(!o||o.disabled||run.gold<o.price)return false;
   run.gold-=o.price;m.bought[id]=(m.bought[id]||0)+1;
   if(id==='heal')m.hp+=o.heal;
   else if(id==='gear'){
-    run.equipment[m.gearId]=gearCount(m.gearId)+m.level;
-    if(m.gearId==='armor')m.hp+=4*m.level;
-  }else if(id==='dodge')run.dodge=Math.min(DODGE_MAX,run.dodge+2);
-  else run[id]++;
-  renderMerchant(id);$('merchantNotice').textContent='已購買 '+o.name+'（本次第 '+m.bought[id]+' 次）。';
+    run.equipment[o.gearId]=gearCount(o.gearId)+o.level;
+    if(o.gearId==='armor')m.hp+=4*o.level;
+  }else{
+    if(id==='dodge')run.dodge=Math.min(DODGE_MAX,run.dodge+2*o.level);
+    else run[id]+=o.level;
+    m.stock[id]=rollMerchantStat(id);
+  }
+  renderMerchant(id);
+  const isStat=Object.hasOwn(merchantStatPrices,id);
+  $('merchantNotice').textContent=(o.lucky?'★ 幸運成交！':'已購買 ')+o.name+' · '+o.price+' G'+(isStat?'。已重骰該項報價。':'。');
   return true;
 }
 function leaveMerchant(){
